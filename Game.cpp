@@ -221,8 +221,6 @@ void Game::renderMenu() {
     highScoreButtonRect.y = 450; //playButtonRect.y + BUTTON_SPACE; // tinh theo playbutton
     highScoreButtonRect.w = BUTTON_WIDTH;
     highScoreButtonRect.h = BUTTON_HEIGHT;
-
-    //SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green color for button
     SDL_RenderCopy(renderer, highScoreButtonNormalTexture, NULL, &highScoreButtonRect);
     //SDL_RenderFillRect(renderer, &highScoreButtonRect);
 
