@@ -374,36 +374,68 @@ void Game::clean() {
 }
 
 
-void Game::handlePlayingEvents(const SDL_Event& event) {
-    // Keyboard state polling - Check which keys are currently pressed
-    const Uint8* keyboardState = SDL_GetKeyboardState(NULL); // Get current keyboard state
+//void Game::handlePlayingEvents(const SDL_Event& event) {
+//    // Keyboard state polling - Check which keys are currently pressed
+//    const Uint8* keyboardState = SDL_GetKeyboardState(NULL); // Get current keyboard state
+//
+//    // Player 1 Movement (WASD)
+//    if (keyboardState[SDL_SCANCODE_W]) {
+//        player1->move(0, -1, mapWidth, mapHeight, map); // Move Player 1 Up
+//    }
+//    if (keyboardState[SDL_SCANCODE_S]) {
+//        player1->move(0, 1, mapWidth, mapHeight, map);  // Move Player 1 Down
+//    }
+//    if (keyboardState[SDL_SCANCODE_A]) {
+//        player1->move(-1, 0, mapWidth, mapHeight, map); // Move Player 1 Left
+//    }
+//    if (keyboardState[SDL_SCANCODE_D]) {
+//        player1->move(1, 0, mapWidth, mapHeight, map);  // Move Player 1 Right
+//    }
+//
+//    // Player 2 Movement (Arrow Keys)
+//    if (keyboardState[SDL_SCANCODE_UP]) {
+//        player2->move(0, -1, mapWidth, mapHeight, map); // Move Player 2 Up
+//    }
+//    if (keyboardState[SDL_SCANCODE_DOWN]) {
+//        player2->move(0, 1, mapWidth, mapHeight, map);  // Move Player 2 Down
+//    }
+//    if (keyboardState[SDL_SCANCODE_LEFT]) {
+//        player2->move(-1, 0, mapWidth, mapHeight, map); // Move Player 2 Left
+//    }
+//    if (keyboardState[SDL_SCANCODE_RIGHT]) {
+//        player2->move(1, 0, mapWidth, mapHeight, map); // Move Player 2 Right
+//    }
+//}
 
-    // Player 1 Movement (WASD)
+void Game::handlePlayingEvents(const SDL_Event& event) {
+    const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+
+    // Player 1 Movement (WASD) - Pass player2 as the otherPlayer
     if (keyboardState[SDL_SCANCODE_W]) {
-        player1->move(0, -1, mapWidth, mapHeight, map); // Move Player 1 Up
+        player1->move(0, -1, mapWidth, mapHeight, map, player2); // Pass player2
     }
     if (keyboardState[SDL_SCANCODE_S]) {
-        player1->move(0, 1, mapWidth, mapHeight, map);  // Move Player 1 Down
+        player1->move(0, 1, mapWidth, mapHeight, map, player2);  // Pass player2
     }
     if (keyboardState[SDL_SCANCODE_A]) {
-        player1->move(-1, 0, mapWidth, mapHeight, map); // Move Player 1 Left
+        player1->move(-1, 0, mapWidth, mapHeight, map, player2); // Pass player2
     }
     if (keyboardState[SDL_SCANCODE_D]) {
-        player1->move(1, 0, mapWidth, mapHeight, map);  // Move Player 1 Right
+        player1->move(1, 0, mapWidth, mapHeight, map, player2);  // Pass player2
     }
 
-    // Player 2 Movement (Arrow Keys)
+    // Player 2 Movement (Arrow Keys) - Pass player1 as the otherPlayer
     if (keyboardState[SDL_SCANCODE_UP]) {
-        player2->move(0, -1, mapWidth, mapHeight, map); // Move Player 2 Up
+        player2->move(0, -1, mapWidth, mapHeight, map, player1); // Pass player1
     }
     if (keyboardState[SDL_SCANCODE_DOWN]) {
-        player2->move(0, 1, mapWidth, mapHeight, map);  // Move Player 2 Down
+        player2->move(0, 1, mapWidth, mapHeight, map, player1);  // Pass player1
     }
     if (keyboardState[SDL_SCANCODE_LEFT]) {
-        player2->move(-1, 0, mapWidth, mapHeight, map); // Move Player 2 Left
+        player2->move(-1, 0, mapWidth, mapHeight, map, player1); // Pass player1
     }
     if (keyboardState[SDL_SCANCODE_RIGHT]) {
-        player2->move(1, 0, mapWidth, mapHeight, map); // Move Player 2 Right
+        player2->move(1, 0, mapWidth, mapHeight, map, player1); // Pass player1
     }
 }
 

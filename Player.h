@@ -10,7 +10,7 @@ public:
 
     void update(int mapWidth, int mapHeight, vector<vector<int>> map); // Update logic (currently empty)
     void render();                                    // Render the player
-    void move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map);     // Move the player
+    void move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer);     // Move the player
     void respawn();
 
     SDL_Rect getRect() const { return rect; }          // Get the player's rectangle (for collision later)

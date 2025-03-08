@@ -30,37 +30,26 @@ void Player::render() {
 
 }
 
-//void Player::move(int dx, int dy, int mapWidth, int mapHeight, vector<vector<int>> map) {
-//    int newX = x + dx;
-//    int newY = y + dy; // Corrected typo: nexY to newY
-//
-//    // For now, basic movement without collision - collision will be added later
-//    x = newX; // Update player's x position
-//    y = newY; // Update player's y position
-//
-//    rect.x = x * 2; // Update rect.x to match the new player position
-//    rect.y = y * 2; // Update rect.y to match the new player position // 10: toc do xe tang
-//}
 
-void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, std::vector<std::vector<int>> map) {
+void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, std::vector<std::vector<int>> map, const Player* otherPlayer) {
+    std::cout << "Player::move - Before: x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl;
+
     int newX = x + dx;
     int newY = y + dy;
 
     // --- Collision Detection (AABB) ---
-    // 1. Calculate the player's potential new bounding box (rect)
     SDL_Rect newRect;
     newRect.x = newX * TILE_SIZE;
     newRect.y = newY * TILE_SIZE;
-    newRect.w = TILE_SIZE; // Use the Player With instead of TILE_SIZE
-    newRect.h = TILE_SIZE; // Use the Player Height instead of TILE_SIZE
+    newRect.w = rect.w;
+    newRect.h = rect.h;
 
-    // 2. Check for collisions with walls (tile type '1')
+    // 1. Check for collisions with walls (tile type '1' or '2')
     bool collision = false;
 
-    // Iterate through all tiles within a reasonable range around the player
     for (int row = std::max(0, newY - 1); row <= std::min(mapHeight - 1, newY + 1); ++row) {
         for (int col = std::max(0, newX - 1); col <= std::min(mapWidth - 1, newX + 1); ++col) {
-            if (map[row][col] == 1 || map[row][col] == 2) { // Check if it's a wall tile
+            if (map[row][col] == 1 || map[row][col] == 2) {
 
                 SDL_Rect wallRect;
                 wallRect.x = col * TILE_SIZE;
@@ -68,19 +57,30 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, std::
                 wallRect.w = TILE_SIZE;
                 wallRect.h = TILE_SIZE;
 
-                // AABB collision check
                 if (newRect.x < wallRect.x + wallRect.w &&
                     newRect.x + newRect.w > wallRect.x &&
                     newRect.y < wallRect.y + wallRect.h &&
                     newRect.y + newRect.h > wallRect.y)
                 {
                     collision = true;
-                    break; // Exit inner loop if collision is found
+                    break;
                 }
             }
         }
         if (collision) {
-            break; // Exit outer loop if collision is found
+            break;
+        }
+    }
+
+    // 2. Check for collision with the other player (if otherPlayer is valid)
+    if (!collision && otherPlayer != nullptr) { // Important: Check if otherPlayer is not null
+        SDL_Rect otherRect = otherPlayer->getRect(); // Get the other player's rect
+        if (newRect.x < otherRect.x + otherRect.w &&
+            newRect.x + newRect.w > otherRect.x &&
+            newRect.y < otherRect.y + otherRect.h &&
+            newRect.y + newRect.h > otherRect.y)
+        {
+            collision = true; // Collision with other player!
         }
     }
 
@@ -88,9 +88,11 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, std::
     if (!collision) {
         x = newX;
         y = newY;
-        rect.x = x * TILE_SIZE; // co the thay doi toc do o day
+        rect.x = x * TILE_SIZE;
         rect.y = y * TILE_SIZE;
     }
+
+    std::cout << "Player::move - After:  x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl; // Debug print
 }
 
 void Player::respawn() {
