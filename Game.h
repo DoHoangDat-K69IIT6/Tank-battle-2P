@@ -1,16 +1,30 @@
 #pragma once
 #include <SDL.h>
 #include <string>
+#include "Player.h"
 #include <SDL_ttf.h>
+#include <vector>
 
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
-
 const int BUTTON_WIDTH = 350;
 const int BUTTON_HEIGHT = 90;
 const int BUTTON_SPACE = 100;
 
-enum GameState { //
+
+const int TILE_SIZE = 35;
+
+const int PLAYER1_START_POS_X = 0;
+const int PLAYER1_START_POS_Y = 0;
+const int PLAYER1_W = 35; 
+const int PLAYER1_H = 35; 
+
+const int PLAYER2_START_POS_X = 500;
+const int PLAYER2_START_POS_Y = 0;
+const int PLAYER2_W = 35;  
+const int PLAYER2_H = 35;  
+
+enum GameState {
     MENU,
     PLAYING,
     GAME_OVER,
@@ -32,12 +46,10 @@ public:
 
     static SDL_Renderer* renderer;
 
-
-
 private:
     SDL_Window* window;
     bool isRunning;
-
+    int countthu = 0;
     GameState gameState;
 
     // Menu-related
@@ -50,21 +62,34 @@ private:
     SDL_Texture* playButtonNormalTexture; // texture cua button
     SDL_Texture* highScoreButtonNormalTexture;
     SDL_Texture* creditsButtonNormalTexture;
-
     SDL_Rect playButtonRect;
     SDL_Rect highScoreButtonRect;
     SDL_Rect creditsButtonRect;
 
+    // khoi tao player pointer
+    Player* player1;
+    Player* player2;
+
+    // texture cua map
+    SDL_Texture* wallTexture;   // Texture for indestructible walls
+    SDL_Texture* wall2Texture; // Texture for walls that can be destroyed (2 hits)
+    SDL_Texture* star3Texture; // Texture for 3x3 stars
+    SDL_Texture* flagTexture; // Texture for flag
+    SDL_Texture* star5Texture; // Texture for 5x5 stars
+
+    std::vector<std::vector<int>> map; // <--- Make map a member variable again (if you removed it)
+    int mapWidth;  // <--- Add mapWidth member variable
+    int mapHeight; // <--- Add mapHeight member variable
+    bool loadMap(const char* filePath);
+    void renderMap();
+
     void renderMenu();
-    void handleMenuEvents();
+    void handleMenuEvents(const SDL_Event& event);
+
+    void handlePlayingEvents(const SDL_Event& event);
 
     void renderHighScore(); // Placeholder
     void renderCredits();   // Placeholder
-
-    bool playButtonHovered;
-    bool highScoreButtonHovered;
-    bool creditsButtonHovered;
-
 
 };
 

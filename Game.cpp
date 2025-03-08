@@ -1,7 +1,9 @@
 #include "Game.h"
 #include <iostream>
 #include <SDL_ttf.h>
+#include "Player.h"
 #include "TextureManager.h"
+#include <fstream>
 
 using namespace std;
 
@@ -10,16 +12,28 @@ SDL_Renderer* Game::renderer = nullptr;
 
 Game::Game() {
     window = nullptr;
+    font = nullptr; 
+    titlefont = nullptr; 
     isRunning = false;
 
     gameState = MENU;
     font = nullptr;
     textColor = { 0, 0, 0, 255 }; // Black
     buttonTextColor = { 255, 255, 255, 255 }; // white
-
-    playButtonHovered = false;
-    highScoreButtonHovered = false;
-    creditsButtonHovered = false;
+    
+    // khoi tao cac bien
+    playButtonRect.x = 0;
+    playButtonRect.y = 0;
+    playButtonRect.w = 0;
+    playButtonRect.h = 0;
+    highScoreButtonRect.x = 0;
+    highScoreButtonRect.y = 0;
+    highScoreButtonRect.w = 0;
+    highScoreButtonRect.h = 0;
+    creditsButtonRect.x = 0;
+    creditsButtonRect.y = 0;
+    creditsButtonRect.w = 0;
+    creditsButtonRect.h = 0;
 }
 
 Game::~Game() {
@@ -61,7 +75,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false;
     }
 
-    /////////// initialize ttf
+    //initialize ttf
     if (TTF_Init() == -1) {
         std::cerr << "SDL_ttf could not initialize! SDL_ttf Error: " << TTF_GetError() << std::endl;
         return false;
@@ -87,7 +101,6 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     highScoreButtonNormalTexture = TextureManager::LoadTexture("assets/button_texture.jpg");
     creditsButtonNormalTexture = TextureManager::LoadTexture("assets/button_texture.jpg");
 
-    //Load all of the button first, before check if it is null or not
     if (!playButtonNormalTexture ||
         !highScoreButtonNormalTexture ||
         !creditsButtonNormalTexture)
@@ -96,34 +109,85 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false;
     }
 
+    // Load wall textures
+    wallTexture = TextureManager::LoadTexture("assets/wall.png"); // Replace with your actual filename
+    if (!wallTexture) {
+        std::cerr << "Failed to load wall texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
+    wall2Texture = TextureManager::LoadTexture("assets/wall2.png"); // Replace with your actual filename
+    if (!wall2Texture) {
+        std::cerr << "Failed to load wall2 texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
+    //star3Texture = TextureManager::LoadTexture("assets/star3.png"); // Replace with your actual filename
+    //if (!star3Texture) {
+    //    std::cerr << "Failed to load star3 texture!" << std::endl;
+    //    return false; // Or handle the error appropriately
+    //}
+
+    //flagTexture = TextureManager::LoadTexture("assets/flag.png"); // Replace with your actual filename
+    //if (!flagTexture) {
+    //    std::cerr << "Failed to load flag texture!" << std::endl;
+    //    return false; // Or handle the error appropriately
+    //}
+
+    //star5Texture = TextureManager::LoadTexture("assets/star5.png"); // Replace with your actual filename
+    //if (!star5Texture) {
+    //    std::cerr << "Failed to load star5 texture!" << std::endl;
+    //    return false; // Or handle the error appropriately
+    //}
+
+    // khoi tao map
+    //loadMap("assets/map.txt");
+
+    // khoi tao nguoi choi
+
+    player1 = new Player(1, 1, "assets/green_tank_test.png");
+    player2 = new Player(37, 20, "assets/green_tank_test.png");
+
+    // khoi tao map
+    loadMap("assets/map.txt");
+
+
+
     return true;
 }
 
 void Game::handleEvents() {
     SDL_Event event;
-    SDL_PollEvent(&event);
-
-    switch (event.type) {
-    case SDL_QUIT:
-        isRunning = false;
-        break;
-    case SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_q) { // Check if 'Q' key is pressed -> Close the window
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_QUIT:
             isRunning = false;
+            break;
+        case SDL_KEYDOWN: // Just call handlePlayingEvents for KEYDOWN in PLAYING state
+            if (gameState == PLAYING) {
+                handlePlayingEvents(event); // Pass event to playing event handler
+            }
+            else if (gameState == MENU) {
+                handleMenuEvents(event);   // Pass event to menu event handler
+            }
+            else if (event.key.keysym.sym == SDLK_q) {
+                isRunning = false;
+            }
+            break;
+        case SDL_MOUSEBUTTONDOWN: // For menu clicks (only handled in MENU state)
+            if (gameState == MENU) {
+                handleMenuEvents(event);
+            }
+            break;
+        default:
+            break;
         }
-        break;
-    default:
-        if (gameState == MENU) { // neu trang thai game o menu thi handle theo kieu menu
-            handleMenuEvents();
-        }
-
-        break;
     }
 }
 
 void Game::update() {
     // Update game logic here (e.g., player movement, enemy AI).  For now, empty.
-
+    
 }
 
 void Game::render() {
@@ -135,11 +199,9 @@ void Game::render() {
         renderMenu();
         break;
     case PLAYING:
-        // (Game rendering will go here later)
-
-
-
-
+        renderMap();
+        player1->render();
+        player2->render();
         break;
     case HIGH_SCORE:
         //renderHighScore();
@@ -150,28 +212,6 @@ void Game::render() {
     }
 
     SDL_RenderPresent(renderer);
-}
-
-void Game::clean() {
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyTexture(menuBackgroundTexture);
-
-    SDL_DestroyTexture(playButtonNormalTexture);
-    SDL_DestroyTexture(highScoreButtonNormalTexture);
-    SDL_DestroyTexture(creditsButtonNormalTexture);
-
-    // huy ttf
-    if (font) { // Check if font is loaded before closing and quitting
-        TTF_CloseFont(font);
-    }
-    if (titlefont) { // Check if font is loaded before closing and quitting
-        TTF_CloseFont(titlefont);
-    }
-    TTF_Quit();
-
-    SDL_Quit();
-    std::cout << "Game Cleaned" << std::endl;
 }
 
 void Game::renderMenu() {
@@ -197,7 +237,6 @@ void Game::renderMenu() {
     playButtonRect.y = 300; // titleRect.y + BUTTON_SPACE + 50; // spawn cách title = 1 but_space + 50 (+ 50 vao cho dep)
     playButtonRect.w = BUTTON_WIDTH; // button width
     playButtonRect.h = BUTTON_HEIGHT; // button height
-
     SDL_RenderCopy(renderer, playButtonNormalTexture, NULL, &playButtonRect); // render texture
 
     //SDL_RenderFillRect(renderer, &playButtonRect);
@@ -221,6 +260,8 @@ void Game::renderMenu() {
     highScoreButtonRect.y = 450; //playButtonRect.y + BUTTON_SPACE; // tinh theo playbutton
     highScoreButtonRect.w = BUTTON_WIDTH;
     highScoreButtonRect.h = BUTTON_HEIGHT;
+
+    //SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green color for button
     SDL_RenderCopy(renderer, highScoreButtonNormalTexture, NULL, &highScoreButtonRect);
     //SDL_RenderFillRect(renderer, &highScoreButtonRect);
 
@@ -259,40 +300,172 @@ void Game::renderMenu() {
     // Initialize button rectangles *after* rendering them:
 }
 
+void Game::handleMenuEvents(const SDL_Event& event) {
+    switch (event.type) {
+    case SDL_QUIT: 
+        isRunning = false;
+        break;
+    case SDL_MOUSEBUTTONDOWN: {
+        int mouseX = event.button.x;
+        int mouseY = event.button.y;
 
-void Game::handleMenuEvents() {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_QUIT:
-            isRunning = false;
-            break;
-        case SDL_MOUSEBUTTONDOWN: {
-            int mouseX = event.button.x;
-            int mouseY = event.button.y;
+        std::cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << std::endl;
 
-            // Check if PLAY button was clicked
-            if (mouseX >= playButtonRect.x && mouseX <= playButtonRect.x + playButtonRect.w &&
-                mouseY >= playButtonRect.y && mouseY <= playButtonRect.y + playButtonRect.h) {
-                gameState = PLAYING;
-                std::cout << "PLAY button clicked!\n";
-            }
-            // Check if HIGH SCORE button was clicked
-            else if (mouseX >= highScoreButtonRect.x && mouseX <= highScoreButtonRect.x + highScoreButtonRect.w &&
-                mouseY >= highScoreButtonRect.y && mouseY <= highScoreButtonRect.y + highScoreButtonRect.h) {
-                gameState = HIGH_SCORE;
-                std::cout << "HIGH SCORE button clicked!\n";
-            }
-            // Check if CREDITS button was clicked
-            else if (mouseX >= creditsButtonRect.x && mouseX <= creditsButtonRect.x + creditsButtonRect.w &&
-                mouseY >= creditsButtonRect.y && mouseY <= creditsButtonRect.y + creditsButtonRect.h) {
-                gameState = CREDITS;
-                std::cout << "CREDITS button clicked!\n";
-            }
-            break;
+        // ... (rest of your mouse button down logic) ...
+        //Check if PLAY button was clicked
+        if (mouseX >= playButtonRect.x && mouseX <= playButtonRect.x + playButtonRect.w &&
+            mouseY >= playButtonRect.y && mouseY <= playButtonRect.y + playButtonRect.h) {
+            gameState = PLAYING;
+            std::cout << "PLAY button clicked!\n";
         }
-        default:
-            break;
+        // Check if HIGH SCORE button was clicked
+        else if (mouseX >= highScoreButtonRect.x && mouseX <= highScoreButtonRect.x + highScoreButtonRect.w &&
+            mouseY >= highScoreButtonRect.y && mouseY <= highScoreButtonRect.y + highScoreButtonRect.h) {
+            gameState = HIGH_SCORE;
+            std::cout << "HIGH SCORE button clicked!\n";
+        }
+        // Check if CREDITS button was clicked
+        else if (mouseX >= creditsButtonRect.x && mouseX <= creditsButtonRect.x + creditsButtonRect.w &&
+            mouseY >= creditsButtonRect.y && mouseY <= creditsButtonRect.y + creditsButtonRect.h) {
+            gameState = CREDITS;
+            std::cout << "CREDITS button clicked!\n";
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void Game::clean() {
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+
+    if (menuBackgroundTexture) { 
+        SDL_DestroyTexture(menuBackgroundTexture);
+        menuBackgroundTexture = nullptr; 
+    }
+    if (playButtonNormalTexture) { 
+        SDL_DestroyTexture(playButtonNormalTexture);
+        playButtonNormalTexture = nullptr; 
+    }
+    if (highScoreButtonNormalTexture) { 
+        SDL_DestroyTexture(highScoreButtonNormalTexture);
+        highScoreButtonNormalTexture = nullptr; 
+    }
+    if (creditsButtonNormalTexture) { 
+        SDL_DestroyTexture(creditsButtonNormalTexture);
+        creditsButtonNormalTexture = nullptr; 
+    }
+
+    // huy ttf
+    if (font) { // Check if font is loaded before closing and quitting
+        TTF_CloseFont(font);
+        font = nullptr;
+    }
+    if (titlefont) { // Check if font is loaded before closing and quitting
+        TTF_CloseFont(titlefont);
+        titlefont = nullptr;
+    }
+    TTF_Quit();
+
+    SDL_Quit();
+    std::cout << "Game Cleaned" << std::endl;
+}
+
+
+void Game::handlePlayingEvents(const SDL_Event& event) {
+    // Keyboard state polling - Check which keys are currently pressed
+    const Uint8* keyboardState = SDL_GetKeyboardState(NULL); // Get current keyboard state
+
+    // Player 1 Movement (WASD)
+    if (keyboardState[SDL_SCANCODE_W]) {
+        player1->move(0, -1, mapWidth, mapHeight, map); // Move Player 1 Up
+    }
+    if (keyboardState[SDL_SCANCODE_S]) {
+        player1->move(0, 1, mapWidth, mapHeight, map);  // Move Player 1 Down
+    }
+    if (keyboardState[SDL_SCANCODE_A]) {
+        player1->move(-1, 0, mapWidth, mapHeight, map); // Move Player 1 Left
+    }
+    if (keyboardState[SDL_SCANCODE_D]) {
+        player1->move(1, 0, mapWidth, mapHeight, map);  // Move Player 1 Right
+    }
+
+    // Player 2 Movement (Arrow Keys)
+    if (keyboardState[SDL_SCANCODE_UP]) {
+        player2->move(0, -1, mapWidth, mapHeight, map); // Move Player 2 Up
+    }
+    if (keyboardState[SDL_SCANCODE_DOWN]) {
+        player2->move(0, 1, mapWidth, mapHeight, map);  // Move Player 2 Down
+    }
+    if (keyboardState[SDL_SCANCODE_LEFT]) {
+        player2->move(-1, 0, mapWidth, mapHeight, map); // Move Player 2 Left
+    }
+    if (keyboardState[SDL_SCANCODE_RIGHT]) {
+        player2->move(1, 0, mapWidth, mapHeight, map); // Move Player 2 Right
+    }
+}
+
+bool Game::loadMap(const char* filePath) {
+    std::ifstream mapFile(filePath);
+    if (!mapFile.is_open()) {
+        std::cerr << "Failed to open map file: " << filePath << std::endl;
+        return false;
+    }
+
+    mapFile >> mapWidth >> mapHeight;  // Read width and height
+
+    map.resize(mapHeight, std::vector<int>(mapWidth)); // Resize the map vector
+
+    for (int row = 0; row < mapHeight; ++row) {
+        for (int col = 0; col < mapWidth; ++col) {
+            char tileChar;
+            mapFile >> tileChar; // Read the tile as a character
+            map[row][col] = tileChar - '0'; // Convert character '0', '1', etc., to integer 0, 1, etc.
+        }
+    }
+
+    mapFile.close();
+    return true;
+}
+
+void Game::renderMap() {
+    for (int row = 0; row < mapHeight; ++row) {
+        for (int col = 0; col < mapWidth; ++col) {
+            int tileType = map[row][col];
+
+            SDL_Rect srcRect; // Source rectangle (within the texture)
+            srcRect.x = 0;    // For now, assume we use the whole texture
+            srcRect.y = 0;
+            srcRect.w = TILE_SIZE;
+            srcRect.h = TILE_SIZE;
+
+            SDL_Rect destRect; // Destination rectangle (on the screen)
+            destRect.x = col * TILE_SIZE;  // Calculate x position based on column and tile width
+            destRect.y = row * TILE_SIZE; // Calculate y position based on row and tile height
+            destRect.w = TILE_SIZE;
+            destRect.h = TILE_SIZE;
+
+            switch (tileType) {
+            case 0: // Empty space - do nothing (just background will show)
+                break;
+            case 1: // Indestructible wall
+                SDL_RenderCopy(renderer, wallTexture, NULL, &destRect); // Draw wall texture
+                break;
+            case 2:
+                SDL_RenderCopy(renderer, wall2Texture, NULL, &destRect);  // Draw wall texture
+                break;
+            //case 7:
+            //    TextureManager::Draw(star3Texture, srcRect, destRect); // Draw wall texture
+            //    break;
+            //case 8:
+            //    TextureManager::Draw(flagTexture, srcRect, destRect); // Draw wall texture
+            //    break;
+            //case 9:
+            //    TextureManager::Draw(star5Texture, srcRect, destRect); // Draw wall texture
+            //    break;
+            }
         }
     }
 }
