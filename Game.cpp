@@ -145,8 +145,8 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
     // khoi tao nguoi choi
 
-    player1 = new Player(1, 1, "assets/green_tank_test.png");
-    player2 = new Player(37, 20, "assets/green_tank_test.png");
+    player1 = new Player(5, 10, "assets/green_tank_test.png");
+    player2 = new Player(33, 10, "assets/green_tank_test.png");
 
     // khoi tao map
     loadMap("assets/map.txt");
