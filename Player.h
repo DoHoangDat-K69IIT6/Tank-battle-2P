@@ -1,7 +1,15 @@
 #pragma once
 #include <SDL.h>
 #include <vector>
+#include "Bullet.h"
 using namespace std;
+
+enum FacingDirection {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT
+};
 
 class Player {
 public:
@@ -13,9 +21,13 @@ public:
     void move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer);     // Move the player
     void respawn();
 
+    void shoot(vector<Bullet*>& bullets, SDL_Texture* bulletTexture);
+
     SDL_Rect getRect() const { return rect; }          // Get the player's rectangle (for collision later)
 
 private:
+    FacingDirection facingDirection;
+
     int startX;
     int startY;
     int x;             // X coordinate in tile units

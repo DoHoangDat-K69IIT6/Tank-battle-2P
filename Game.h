@@ -77,6 +77,9 @@ private:
     SDL_Texture* flagTexture; // Texture for flag
     SDL_Texture* star5Texture; // Texture for 5x5 stars
 
+    //bullet
+    vector<Bullet*> bullets;
+
     std::vector<std::vector<int>> map; // <--- Make map a member variable again (if you removed it)
     int mapWidth;  // <--- Add mapWidth member variable
     int mapHeight; // <--- Add mapHeight member variable

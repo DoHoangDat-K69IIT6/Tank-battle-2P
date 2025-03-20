@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "TextureManager.h"
 #include <fstream>
+#include "Bullet.h"
 
 using namespace std;
 
@@ -145,13 +146,11 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
     // khoi tao nguoi choi
 
-    player1 = new Player(5, 10, "assets/green_tank_test.png");
-    player2 = new Player(33, 10, "assets/green_tank_test.png");
+    player1 = new Player(175, 350, "assets/green_tank_test.png");
+    player2 = new Player(1155, 350, "assets/green_tank_test.png");
 
     // khoi tao map
     loadMap("assets/map.txt");
-
-
 
     return true;
 }
@@ -187,6 +186,18 @@ void Game::handleEvents() {
 
 void Game::update() {
     // Update game logic here (e.g., player movement, enemy AI).  For now, empty.
+
+    for (int i = 0; i < bullets.size(); ++i) {
+        if (bullets[i]->isActive()) {
+            bullets[i]->update(); // Call update on active bullets
+        }
+        else {
+            // If bullet is not active, delete it and remove from vector
+            delete bullets[i];
+            bullets.erase(bullets.begin() + i);
+            --i; // Adjust index after erasing
+        }
+    }
     
 }
 
@@ -202,6 +213,9 @@ void Game::render() {
         renderMap();
         player1->render();
         player2->render();
+        for (Bullet* bullet : bullets) { // Loop through ALL bullets, update and render
+            bullet->render(); //The bullet check if it is active.
+        }
         break;
     case HIGH_SCORE:
         //renderHighScore();
@@ -369,43 +383,15 @@ void Game::clean() {
     }
     TTF_Quit();
 
+    for (Bullet* bullet : bullets) { // Very, very important to delete allocated bullets!
+        delete bullet;
+    }
+    bullets.clear(); // Clear the bullets vector
+
     SDL_Quit();
     std::cout << "Game Cleaned" << std::endl;
 }
 
-
-//void Game::handlePlayingEvents(const SDL_Event& event) {
-//    // Keyboard state polling - Check which keys are currently pressed
-//    const Uint8* keyboardState = SDL_GetKeyboardState(NULL); // Get current keyboard state
-//
-//    // Player 1 Movement (WASD)
-//    if (keyboardState[SDL_SCANCODE_W]) {
-//        player1->move(0, -1, mapWidth, mapHeight, map); // Move Player 1 Up
-//    }
-//    if (keyboardState[SDL_SCANCODE_S]) {
-//        player1->move(0, 1, mapWidth, mapHeight, map);  // Move Player 1 Down
-//    }
-//    if (keyboardState[SDL_SCANCODE_A]) {
-//        player1->move(-1, 0, mapWidth, mapHeight, map); // Move Player 1 Left
-//    }
-//    if (keyboardState[SDL_SCANCODE_D]) {
-//        player1->move(1, 0, mapWidth, mapHeight, map);  // Move Player 1 Right
-//    }
-//
-//    // Player 2 Movement (Arrow Keys)
-//    if (keyboardState[SDL_SCANCODE_UP]) {
-//        player2->move(0, -1, mapWidth, mapHeight, map); // Move Player 2 Up
-//    }
-//    if (keyboardState[SDL_SCANCODE_DOWN]) {
-//        player2->move(0, 1, mapWidth, mapHeight, map);  // Move Player 2 Down
-//    }
-//    if (keyboardState[SDL_SCANCODE_LEFT]) {
-//        player2->move(-1, 0, mapWidth, mapHeight, map); // Move Player 2 Left
-//    }
-//    if (keyboardState[SDL_SCANCODE_RIGHT]) {
-//        player2->move(1, 0, mapWidth, mapHeight, map); // Move Player 2 Right
-//    }
-//}
 
 void Game::handlePlayingEvents(const SDL_Event& event) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
@@ -423,6 +409,9 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
     if (keyboardState[SDL_SCANCODE_D]) {
         player1->move(1, 0, mapWidth, mapHeight, map, player2);  // Pass player2
     }
+    if (keyboardState[SDL_SCANCODE_SPACE]) {
+        // Player 1 shoot
+    }
 
     // Player 2 Movement (Arrow Keys) - Pass player1 as the otherPlayer
     if (keyboardState[SDL_SCANCODE_UP]) {
@@ -436,6 +425,17 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
     }
     if (keyboardState[SDL_SCANCODE_RIGHT]) {
         player2->move(1, 0, mapWidth, mapHeight, map, player1); // Pass player1
+    }
+
+    if (keyboardState[SDL_SCANCODE_SPACE]) { // Player 1 shoots with SPACE
+        // Create a bullet for Player 1, moving upwards (you can adjust direction)
+        Bullet* bullet = new Bullet(player1->getRect().x + player1->getRect().w / 2 - 8, player1->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
+        bullets.push_back(bullet);
+    }
+    if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
+        // Create a bullet for Player 2, moving upwards (you can adjust direction)
+        Bullet* bullet = new Bullet(player2->getRect().x + player2->getRect().w / 2 - 8, player2->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
+        bullets.push_back(bullet);
     }
 }
 

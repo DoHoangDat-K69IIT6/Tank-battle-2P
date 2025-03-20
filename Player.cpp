@@ -1,18 +1,21 @@
 #include "Player.h"
 #include "TextureManager.h"
 #include "Game.h"
+#include "Bullet.h"
 #include <iostream>
+
+const int SPEED = 5;
 
 using namespace std;
 
-Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), x(x), y(y), speed(10) {
+Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), x(x), y(y), speed(5), facingDirection(UP) {
     playerTexture = TextureManager::LoadTexture(texturePath);
     if (!playerTexture) {
         cout << "Failed to load player texture!" << endl;
     }
 
-    rect.x = x * TILE_SIZE; // Initialize rect.x based on constructor 'x' and tile size
-    rect.y = y * TILE_SIZE; // Initialize rect.y based on constructor 'y' and tile size
+    rect.x = x; 
+    rect.y = y;
     rect.w = TILE_SIZE;
     rect.h = TILE_SIZE;
 }
@@ -26,29 +29,32 @@ void Player::update(int mapWidth, int mapHeight, vector<vector<int>> map) {
 }
 
 void Player::render() {
-    TextureManager::Draw(playerTexture, { 0, 0, TILE_SIZE, TILE_SIZE }, rect); // Corrected: Call TextureManager::Draw to render the texture
-
+    TextureManager::Draw(playerTexture, { 0, 0, TILE_SIZE, TILE_SIZE }, rect); // render player
 }
 
+void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer) {
+    cout << "Player::move - Before: x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl;
 
-void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, std::vector<std::vector<int>> map, const Player* otherPlayer) {
-    std::cout << "Player::move - Before: x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl;
-
-    int newX = x + dx;
-    int newY = y + dy;
+    int newX = x + dx * SPEED;
+    int newY = y + dy * SPEED;
 
     // --- Collision Detection (AABB) ---
     SDL_Rect newRect;
-    newRect.x = newX * TILE_SIZE;
-    newRect.y = newY * TILE_SIZE;
+    newRect.x = newX;
+    newRect.y = newY;
     newRect.w = rect.w;
     newRect.h = rect.h;
+
+    if (dx < 0) facingDirection = LEFT;
+    else if (dx > 0) facingDirection = RIGHT;
+    else if (dy < 0) facingDirection = UP;
+    else if (dy > 0) facingDirection = DOWN;
 
     // 1. Check for collisions with walls (tile type '1' or '2')
     bool collision = false;
 
-    for (int row = std::max(0, newY - 1); row <= std::min(mapHeight - 1, newY + 1); ++row) {
-        for (int col = std::max(0, newX - 1); col <= std::min(mapWidth - 1, newX + 1); ++col) {
+    for (int row = max(0, newY - 1); row <= min(mapHeight - 1, newY + 1); ++row) {
+        for (int col = max(0, newX - 1); col <= min(mapWidth - 1, newX + 1); ++col) {
             if (map[row][col] == 1 || map[row][col] == 2) {
 
                 SDL_Rect wallRect;
@@ -88,8 +94,8 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, std::
     if (!collision) {
         x = newX;
         y = newY;
-        rect.x = x * TILE_SIZE;
-        rect.y = y * TILE_SIZE;
+        rect.x = x;
+        rect.y = y;
     }
 
     std::cout << "Player::move - After:  x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl; // Debug print
@@ -101,3 +107,13 @@ void Player::respawn() {
     rect.x = x * TILE_SIZE;
     rect.y = y * TILE_SIZE;
 }
+
+//// Inside Player.cpp
+//void Player::shoot(std::vector<Bullet*>& bullets, SDL_Texture* bulletTexture)
+//{
+//    //this function should be called by a key press,
+//    //so it must create a new bullet, at player current position.
+//    //remember the bullets array is owned by Game class
+//
+//    bullets.push_back(new Bullet(x, y, 0, -1, bulletTexture)); // You need to adjust the direction correctly, use directionX and directionY, like in your move
+//}
