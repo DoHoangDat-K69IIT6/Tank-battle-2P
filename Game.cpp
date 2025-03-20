@@ -459,61 +459,60 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
     }
 
     if (keyboardState[SDL_SCANCODE_SPACE]) { // Player 1 shoots with SPACE
-        // Create a bullet for Player 1, moving upwards (you can adjust direction)
-        //Bullet* bullet = new Bullet(player1->getRect().x + player1->getRect().w / 2 - 8, player1->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
-        //bullets.push_back(bullet);
-        //Bullet* bullet = new Bullet(player1->getRect().x + player1->getRect().w / 2 - 8, player1->getRect().y - 20, 0, -1, "assets/bullet.png"); // Spawn 20 pixels above player
-        //bullets.push_back(bullet);
+        Uint32 currentTime = SDL_GetTicks();
+        if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) { // Fire rate check
 
-        FacingDirection p1Facing = player1->getFacingDirection();
-        int bulletDirX = 0;
-        int bulletDirY = 0;
-        int spawnOffsetX = 0;
-        int spawnOffsetY = 0;
+            player1->setLastShotTime(currentTime); // Update last shot time
 
-        switch (p1Facing) {
-        case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
-        case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
-        case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
-        case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+            FacingDirection p1Facing = player1->getFacingDirection();
+            int bulletDirX = 0;
+            int bulletDirY = 0;
+            int spawnOffsetX = 0;
+            int spawnOffsetY = 0;
+
+            switch (p1Facing) {
+            case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
+            case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
+            case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
+            case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+            }
+
+            Bullet* bullet = new Bullet(
+                player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
+                player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
+                bulletDirX, bulletDirY,
+                "assets/bullet.png"
+            );
+            bullets.push_back(bullet);
         }
-
-        Bullet* bullet = new Bullet(
-            player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX, // Adjusted X spawn
-            player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY, // Adjusted Y spawn
-            bulletDirX, bulletDirY,
-            "assets/bullet.png"
-        );
-        bullets.push_back(bullet);
-
     }
     if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
-        // Create a bullet for Player 2, moving upwards (you can adjust direction)
-        //Bullet* bullet = new Bullet(player2->getRect().x + player2->getRect().w / 2 - 8, player2->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
-        //bullets.push_back(bullet);
-        //Bullet* bullet = new Bullet(player2->getRect().x + player2->getRect().w / 2 - 8, player2->getRect().y - 20, 0, -1, "assets/bullet.png"); // Spawn 20 pixels above player
-        //bullets.push_back(bullet);
+        Uint32 currentTime = SDL_GetTicks();
+        if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) { // Fire rate check
 
-        FacingDirection p1Facing = player1->getFacingDirection();
-        int bulletDirX = 0;
-        int bulletDirY = 0;
-        int spawnOffsetX = 0;
-        int spawnOffsetY = 0;
+            player2->setLastShotTime(currentTime); // Update last shot time
 
-        switch (p1Facing) {
-        case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
-        case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
-        case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
-        case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+            FacingDirection p2Facing = player2->getFacingDirection();
+            int bulletDirX = 0;
+            int bulletDirY = 0;
+            int spawnOffsetX = 0;
+            int spawnOffsetY = 0;
+
+            switch (p2Facing) {
+            case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
+            case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
+            case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
+            case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+            }
+
+            Bullet* bullet = new Bullet(
+                player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
+                player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
+                bulletDirX, bulletDirY,
+                "assets/bullet.png"
+            );
+            bullets.push_back(bullet);
         }
-
-        Bullet* bullet = new Bullet(
-            player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX, // Adjusted X spawn
-            player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY, // Adjusted Y spawn
-            bulletDirX, bulletDirY,
-            "assets/bullet.png"
-        );
-        bullets.push_back(bullet);
     }
 }
 

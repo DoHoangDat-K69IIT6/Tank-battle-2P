@@ -26,6 +26,10 @@ public:
     SDL_Rect getRect() const { return rect; }          // Get the player's rectangle (for collision later)
 
     FacingDirection getFacingDirection() const { return facingDirection; }
+
+    Uint32 getLastShotTime() const { return lastShotTime; } // Getter for lastShotTime
+    void setLastShotTime(Uint32 time) { lastShotTime = time; } // Setter for lastShotTime
+    Uint32 getFireRate() const { return fireRate; }       // Getter for fireRate (read-only)
 private:
     FacingDirection facingDirection;
 
@@ -36,4 +40,7 @@ private:
     int speed;         // Movement speed (pixels per step)
     SDL_Texture* playerTexture; // Texture for the player's image
     SDL_Rect rect;      // Rectangle to define player's position and size
+
+    Uint32 lastShotTime;  // Time of the last shot (in milliseconds)
+    const Uint32 fireRate; // Minimum time between shots (in milliseconds)
 };
