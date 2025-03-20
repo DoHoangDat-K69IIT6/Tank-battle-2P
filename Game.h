@@ -49,7 +49,7 @@ public:
 
     static int getMapWidth() { return mapWidth; }  // Static getter for mapWidth
     static int getMapHeight() { return mapHeight; } // Static getter for mapHeight
-    static const std::vector<std::vector<int>>& getMap() { return map; } // Static getter for map
+    static vector<vector<int>>& getMap() { return map; } // Static getter for map
 
 private:
     SDL_Window* window;
@@ -85,7 +85,7 @@ private:
     //bullet
     vector<Bullet*> bullets;
 
-    static std::vector<std::vector<int>> map; // <--- Add static here
+    static vector<vector<int>> map; // <--- Add static here
     static int mapWidth;                     // <--- Add static here
     static int mapHeight;                    // <--- Add static here
 
@@ -96,6 +96,8 @@ private:
     void handleMenuEvents(const SDL_Event& event);
 
     void handlePlayingEvents(const SDL_Event& event);
+
+    void copyFileContent(const std::string& sourceFilePath, const std::string& destinationFilePath);
 
     void renderHighScore(); // Placeholder
     void renderCredits();   // Placeholder

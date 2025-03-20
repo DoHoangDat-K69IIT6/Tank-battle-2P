@@ -21,6 +21,7 @@ Bullet::~Bullet() {
     SDL_DestroyTexture(texture);
 }
 
+// Bullet.cpp (modified update function)
 void Bullet::update() {
     if (!active) return;
 
@@ -36,30 +37,47 @@ void Bullet::update() {
 
     int mapWidth = Game::getMapWidth();
     int mapHeight = Game::getMapHeight();
-    const std::vector<std::vector<int>>& map = Game::getMap();
+    vector<vector<int>>& map = Game::getMap(); // Get a reference to the map (important for modification)
 
     if (mapWidth > 0 && mapHeight > 0 && !map.empty()) {
-        // --- VERY SIMPLIFIED Collision Check: Check tile at bullet's CENTER ---
-        int tileRow = (rect.y + rect.h / 2) / TILE_SIZE; // Get tile row of bullet's center
-        int tileCol = (rect.x + rect.w / 2) / TILE_SIZE; // Get tile col of bullet's center
+        bool collisionDetected = false; // Flag to track if any corner collided
 
-        // --- DEBUG PRINTS - START ---
-        std::cout << "Bullet Update: x=" << rect.x << ", y=" << rect.y << std::endl;
-        std::cout << "  Checking Tile at Row=" << tileRow << ", Col=" << tileCol << std::endl;
-        // --- DEBUG PRINTS - END ---
+        // --- 4-CORNER COLLISION CHECK ---
+        SDL_Point corners[4];
+        corners[0] = { rect.x, rect.y };                      // Top-left
+        corners[1] = { rect.x + rect.w - 1, rect.y };          // Top-right
+        corners[2] = { rect.x, rect.y + rect.h - 1 };          // Bottom-left
+        corners[3] = { rect.x + rect.w - 1, rect.y + rect.h - 1 }; // Bottom-right
 
+        for (const auto& corner : corners) {
+            int tileRow = corner.y / TILE_SIZE;
+            int tileCol = corner.x / TILE_SIZE;
 
-        // Check if tile coordinates are within map bounds
-        if (tileRow >= 0 && tileRow < mapHeight && tileCol >= 0 && tileCol < mapWidth) {
-            if (map[tileRow][tileCol] == 1) {
-                std::cout << "  SIMPLE COLLISION DETECTED! TileType=" << map[tileRow][tileCol] << ", Bullet deactivated." << std::endl; // Debug
-                active = false; // Deactivate bullet if center is in a wall tile
-                return;
+            if (tileRow >= 0 && tileRow < mapHeight && tileCol >= 0 && tileCol < mapWidth) {
+                int tileType = map[tileRow][tileCol];
+
+                if (tileType == 1) { // Indestructible wall
+                    collisionDetected = true;
+                    std::cout << "  Bullet Corner Collision with Indestructible Wall! Deactivating bullet." << std::endl;
+                    break; // No need to check other corners, collision found
+                }
+                else if (tileType == 2) { // Destructible Wall (2 hits)
+                    map[tileRow][tileCol] = 3; // Change to 1-hit remaining wall (type 3)
+                    collisionDetected = true;
+                    std::cout << "  Bullet Corner Collision with Destructible Wall (2 hits -> 1 hit)! Deactivating bullet." << std::endl;
+                    break;
+                }
+                else if (tileType == 3) { // Destructible Wall (1 hit remaining)
+                    map[tileRow][tileCol] = 0; // Destroy the wall (set to empty)
+                    collisionDetected = true;
+                    std::cout << "  Bullet Corner Collision with Destructible Wall (1 hit -> Destroyed)! Deactivating bullet." << std::endl;
+                    break;
+                }
             }
+        }
 
-            /*if (map[tileRow][tileCol] == 2) {
-                map[tileRow][tileCol] = 5;
-            }*/
+        if (collisionDetected) {
+            active = false; // Deactivate bullet if any corner collided
         }
     }
 }

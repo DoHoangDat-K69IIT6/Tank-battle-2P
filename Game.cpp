@@ -154,6 +154,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     player2 = new Player(1155, 350, "assets/green_tank_test.png");
 
     // khoi tao map
+    Game::copyFileContent("assets/scr_map.txt", "assets/map.txt");
     loadMap("assets/map.txt");
 
     return true;
@@ -589,4 +590,34 @@ void Game::renderMap() {
             }
         }
     }
+}
+
+#include <string>
+
+void Game::copyFileContent(const std::string& sourceFilePath, const std::string& destinationFilePath) {
+    std::ofstream destFileClear(destinationFilePath, std::ios::trunc);
+    destFileClear.close();
+
+    std::ifstream sourceFile(sourceFilePath);
+    if (!sourceFile.is_open()) {
+        std::cerr << "Khong the mo tep nguon " << sourceFilePath << std::endl;
+        return;
+    }
+
+    std::ofstream destFile(destinationFilePath, std::ios::app);
+    if (!destFile.is_open()) {
+        std::cerr << "Khong the mo tep dich " << destinationFilePath << std::endl;
+        sourceFile.close(); 
+        return;
+    }
+
+    std::string line;
+    while (std::getline(sourceFile, line)) {
+        destFile << line << std::endl;
+    }
+
+    sourceFile.close();
+    destFile.close();
+
+    std::cout << "Noi dung cua '" << sourceFilePath << "' da duoc sao chep vao '" << destinationFilePath << "'" << std::endl;
 }
