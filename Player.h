@@ -25,6 +25,7 @@ public:
 
     SDL_Rect getRect() const { return rect; }          // Get the player's rectangle (for collision later)
 
+    FacingDirection getFacingDirection() const { return facingDirection; }
 private:
     FacingDirection facingDirection;
 

@@ -8,7 +8,7 @@ const int SPEED = 5;
 
 using namespace std;
 
-Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), x(x), y(y), speed(5), facingDirection(UP) {
+Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), speed(SPEED), x(x), y(y), facingDirection(UP) {
     playerTexture = TextureManager::LoadTexture(texturePath);
     if (!playerTexture) {
         cout << "Failed to load player texture!" << endl;
@@ -26,6 +26,7 @@ Player::~Player() {
 
 void Player::update(int mapWidth, int mapHeight, vector<vector<int>> map) {
     // You might have player updates here later
+
 }
 
 void Player::render() {
@@ -50,16 +51,49 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
     else if (dy < 0) facingDirection = UP;
     else if (dy > 0) facingDirection = DOWN;
 
-    // 1. Check for collisions with walls (tile type '1' or '2')
+    //// 1. Check for collisions with walls (tile type '1' or '2')
+    //bool collision = false;
+
+    //for (int row = max(0, newY - 1); row <= min(mapHeight - 1, newY + 1); ++row) {
+    //    for (int col = max(0, newX - 1); col <= min(mapWidth - 1, newX + 1); ++col) {
+    //        if (map[row][col] == 1 || map[row][col] == 2) {
+
+    //            SDL_Rect wallRect;
+    //            wallRect.x = col * TILE_SIZE;
+    //            wallRect.y = row * TILE_SIZE;
+    //            wallRect.w = TILE_SIZE;
+    //            wallRect.h = TILE_SIZE;
+
+    //            if (newRect.x < wallRect.x + wallRect.w &&
+    //                newRect.x + newRect.w > wallRect.x &&
+    //                newRect.y < wallRect.y + wallRect.h &&
+    //                newRect.y + newRect.h > wallRect.y)
+    //            {
+    //                collision = true;
+    //                break;
+    //            }
+    //        }
+    //    }
+    //    if (collision) {
+    //        break;
+    //    }
+    //}
+        // 1. Check for collisions with walls (tile type '1' or '2')
     bool collision = false;
 
-    for (int row = max(0, newY - 1); row <= min(mapHeight - 1, newY + 1); ++row) {
-        for (int col = max(0, newX - 1); col <= min(mapWidth - 1, newX + 1); ++col) {
-            if (map[row][col] == 1 || map[row][col] == 2) {
+    // Iterate through TILES based on PLAYER's POTENTIAL NEW PIXEL POSITION
+    int startTileRow = std::max(0, newY / TILE_SIZE - 1);  // Calculate starting tile row in pixel space
+    int endTileRow = std::min(mapHeight / TILE_SIZE - 1, newY / TILE_SIZE + 1); // Calculate ending tile row in pixel space
+    int startTileCol = std::max(0, newX / TILE_SIZE - 1);  // Calculate starting tile col in pixel space
+    int endTileCol = std::min(mapWidth / TILE_SIZE - 1, newX / TILE_SIZE + 1); // Calculate ending tile col in pixel space
 
+
+    for (int row = startTileRow; row <= endTileRow; ++row) { // Iterate through tile rows
+        for (int col = startTileCol; col <= endTileCol; ++col) { // Iterate through tile cols
+            if (map[row][col] == 1 || map[row][col] == 2) {
                 SDL_Rect wallRect;
-                wallRect.x = col * TILE_SIZE;
-                wallRect.y = row * TILE_SIZE;
+                wallRect.x = col * TILE_SIZE; // Wall rect in PIXEL coordinates
+                wallRect.y = row * TILE_SIZE; // Wall rect in PIXEL coordinates
                 wallRect.w = TILE_SIZE;
                 wallRect.h = TILE_SIZE;
 

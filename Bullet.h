@@ -12,6 +12,9 @@ public:
     SDL_Rect getRect() const { return rect; }
     bool isActive() const { return active; }
 
+    void deactivate() { active = false; } // Function to deactivate bullet explicitly
+    // bool isActive() const { return active; }
+
 private:
 
     int x;

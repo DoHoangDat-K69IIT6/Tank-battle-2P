@@ -11,6 +11,10 @@ using namespace std;
 
 SDL_Renderer* Game::renderer = nullptr;
 
+std::vector<std::vector<int>> Game::map;      // Initialize static map
+int Game::mapWidth = 0;                       // Initialize static mapWidth
+int Game::mapHeight = 0;
+
 Game::Game() {
     window = nullptr;
     font = nullptr; 
@@ -190,6 +194,36 @@ void Game::update() {
     for (int i = 0; i < bullets.size(); ++i) {
         if (bullets[i]->isActive()) {
             bullets[i]->update(); // Call update on active bullets
+
+            // --- Bullet-Player Collision Detection ---
+            SDL_Rect bulletRect = bullets[i]->getRect();
+            SDL_Rect player1Rect = player1->getRect();
+            SDL_Rect player2Rect = player2->getRect();
+
+            // Bullet vs Player 1
+            if (bullets[i]->isActive() && // Check if bullet is still active after update()
+                bulletRect.x < player1Rect.x + player1Rect.w &&
+                bulletRect.x + bulletRect.w > player1Rect.x &&
+                bulletRect.y < player1Rect.y + player1Rect.h &&
+                bulletRect.y + bulletRect.h > player1Rect.y)
+            {
+                bullets[i]->deactivate(); // Deactivate bullet
+                player1->respawn();      // Player 1 respawns (you can change this to health decrease etc.)
+                cout << "Player 1 hit!" << endl;
+            }
+            // Bullet vs Player 2
+            if (bullets[i]->isActive() && // Check if bullet is still active after update()
+                bulletRect.x < player2Rect.x + player2Rect.w &&
+                bulletRect.x + bulletRect.w > player2Rect.x &&
+                bulletRect.y < player2Rect.y + player2Rect.h &&
+                bulletRect.y + bulletRect.h > player2Rect.y)
+            {
+                bullets[i]->deactivate(); // Deactivate bullet
+                player2->respawn();      // Player 2 respawns
+                cout << "Player 2 hit!" << endl;
+            }
+            // --- End Bullet-Player Collision Detection ---
+
         }
         else {
             // If bullet is not active, delete it and remove from vector
@@ -198,7 +232,6 @@ void Game::update() {
             --i; // Adjust index after erasing
         }
     }
-    
 }
 
 void Game::render() {
@@ -398,43 +431,88 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
 
     // Player 1 Movement (WASD) - Pass player2 as the otherPlayer
     if (keyboardState[SDL_SCANCODE_W]) {
-        player1->move(0, -1, mapWidth, mapHeight, map, player2); // Pass player2
+        player1->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
     }
     if (keyboardState[SDL_SCANCODE_S]) {
-        player1->move(0, 1, mapWidth, mapHeight, map, player2);  // Pass player2
+        player1->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
     }
     if (keyboardState[SDL_SCANCODE_A]) {
-        player1->move(-1, 0, mapWidth, mapHeight, map, player2); // Pass player2
+        player1->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
     }
     if (keyboardState[SDL_SCANCODE_D]) {
-        player1->move(1, 0, mapWidth, mapHeight, map, player2);  // Pass player2
+        player1->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
     }
-    if (keyboardState[SDL_SCANCODE_SPACE]) {
-        // Player 1 shoot
-    }
+
 
     // Player 2 Movement (Arrow Keys) - Pass player1 as the otherPlayer
     if (keyboardState[SDL_SCANCODE_UP]) {
-        player2->move(0, -1, mapWidth, mapHeight, map, player1); // Pass player1
+        player2->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
     }
     if (keyboardState[SDL_SCANCODE_DOWN]) {
-        player2->move(0, 1, mapWidth, mapHeight, map, player1);  // Pass player1
+        player2->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);  // Pass player1
     }
     if (keyboardState[SDL_SCANCODE_LEFT]) {
-        player2->move(-1, 0, mapWidth, mapHeight, map, player1); // Pass player1
+        player2->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
     }
     if (keyboardState[SDL_SCANCODE_RIGHT]) {
-        player2->move(1, 0, mapWidth, mapHeight, map, player1); // Pass player1
+        player2->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
     }
 
     if (keyboardState[SDL_SCANCODE_SPACE]) { // Player 1 shoots with SPACE
         // Create a bullet for Player 1, moving upwards (you can adjust direction)
-        Bullet* bullet = new Bullet(player1->getRect().x + player1->getRect().w / 2 - 8, player1->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
+        //Bullet* bullet = new Bullet(player1->getRect().x + player1->getRect().w / 2 - 8, player1->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
+        //bullets.push_back(bullet);
+        //Bullet* bullet = new Bullet(player1->getRect().x + player1->getRect().w / 2 - 8, player1->getRect().y - 20, 0, -1, "assets/bullet.png"); // Spawn 20 pixels above player
+        //bullets.push_back(bullet);
+
+        FacingDirection p1Facing = player1->getFacingDirection();
+        int bulletDirX = 0;
+        int bulletDirY = 0;
+        int spawnOffsetX = 0;
+        int spawnOffsetY = 0;
+
+        switch (p1Facing) {
+        case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
+        case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
+        case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
+        case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+        }
+
+        Bullet* bullet = new Bullet(
+            player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX, // Adjusted X spawn
+            player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY, // Adjusted Y spawn
+            bulletDirX, bulletDirY,
+            "assets/bullet.png"
+        );
         bullets.push_back(bullet);
+
     }
     if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
         // Create a bullet for Player 2, moving upwards (you can adjust direction)
-        Bullet* bullet = new Bullet(player2->getRect().x + player2->getRect().w / 2 - 8, player2->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
+        //Bullet* bullet = new Bullet(player2->getRect().x + player2->getRect().w / 2 - 8, player2->getRect().y, 0, -1, "assets/bullet.png"); // Adjust starting position and direction
+        //bullets.push_back(bullet);
+        //Bullet* bullet = new Bullet(player2->getRect().x + player2->getRect().w / 2 - 8, player2->getRect().y - 20, 0, -1, "assets/bullet.png"); // Spawn 20 pixels above player
+        //bullets.push_back(bullet);
+
+        FacingDirection p1Facing = player1->getFacingDirection();
+        int bulletDirX = 0;
+        int bulletDirY = 0;
+        int spawnOffsetX = 0;
+        int spawnOffsetY = 0;
+
+        switch (p1Facing) {
+        case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
+        case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
+        case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
+        case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+        }
+
+        Bullet* bullet = new Bullet(
+            player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX, // Adjusted X spawn
+            player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY, // Adjusted Y spawn
+            bulletDirX, bulletDirY,
+            "assets/bullet.png"
+        );
         bullets.push_back(bullet);
     }
 }
@@ -459,6 +537,18 @@ bool Game::loadMap(const char* filePath) {
     }
 
     mapFile.close();
+
+    // --- DEBUGGING: Print Map Data ---
+    std::cout << "Map Width: " << mapWidth << ", Map Height: " << mapHeight << std::endl;
+    std::cout << "Map Data:" << std::endl;
+    for (int row = 0; row < mapHeight; ++row) {
+        for (int col = 0; col < mapWidth; ++col) {
+            std::cout << map[row][col];
+        }
+        std::cout << std::endl;
+    }
+    // --- DEBUGGING END ---
+
     return true;
 }
 

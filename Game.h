@@ -24,6 +24,7 @@ const int PLAYER2_START_POS_Y = 0;
 const int PLAYER2_W = 35;  
 const int PLAYER2_H = 35;  
 
+
 enum GameState {
     MENU,
     PLAYING,
@@ -45,6 +46,10 @@ public:
     void clean();
 
     static SDL_Renderer* renderer;
+
+    static int getMapWidth() { return mapWidth; }  // Static getter for mapWidth
+    static int getMapHeight() { return mapHeight; } // Static getter for mapHeight
+    static const std::vector<std::vector<int>>& getMap() { return map; } // Static getter for map
 
 private:
     SDL_Window* window;
@@ -80,9 +85,10 @@ private:
     //bullet
     vector<Bullet*> bullets;
 
-    std::vector<std::vector<int>> map; // <--- Make map a member variable again (if you removed it)
-    int mapWidth;  // <--- Add mapWidth member variable
-    int mapHeight; // <--- Add mapHeight member variable
+    static std::vector<std::vector<int>> map; // <--- Add static here
+    static int mapWidth;                     // <--- Add static here
+    static int mapHeight;                    // <--- Add static here
+
     bool loadMap(const char* filePath);
     void renderMap();
 
