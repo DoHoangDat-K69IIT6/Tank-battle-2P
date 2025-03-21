@@ -162,8 +162,8 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
     // khoi tao nguoi choi
 
-    player1 = new Player(175, 350, "assets/green_tank_test.png");
-    player2 = new Player(1155, 350, "assets/green_tank_test.png");
+    player1 = new Player(175, 350, "assets/green_tank1_spritesheet.png");
+    player2 = new Player(1155, 350, "assets/green_tank1_spritesheet.png");
 
     // khoi tao map
     Game::copyFileContent("assets/scr_map.txt", "assets/map.txt");
@@ -484,17 +484,17 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
             int spawnOffsetY = 0;
 
             switch (p1Facing) {
-            case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
-            case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
-            case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
-            case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+                case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
+                case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
+                case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
+                case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
             }
 
             Bullet* bullet = new Bullet(
                 player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
                 player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
                 bulletDirX, bulletDirY,
-                "assets/bullet.png"
+                "assets/bullet_spritesheet.png"
             );
             bullets.push_back(bullet);
         }
@@ -522,7 +522,7 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
                 player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
                 bulletDirX, bulletDirY,
-                "assets/bullet.png"
+                "assets/bullet_spritesheet.png"
             );
             bullets.push_back(bullet);
         }

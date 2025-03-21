@@ -8,6 +8,7 @@ const int SPEED = 5;
 
 using namespace std;
 
+
 Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), speed(SPEED), x(x), y(y), fireRate(700), facingDirection(UP) {
     playerTexture = TextureManager::LoadTexture(texturePath);
     if (!playerTexture) {
@@ -18,6 +19,12 @@ Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), sp
     rect.y = y;
     rect.w = TILE_SIZE;
     rect.h = TILE_SIZE;
+
+    // Initialize source rectangle (for the UP sprite initially)
+    srcRect.x = 0; // Assuming UP sprite is at the first position (x=0) in the sheet
+    srcRect.y = 0; // And at the top row (y=0)
+    srcRect.w = TILE_SIZE;
+    srcRect.h = TILE_SIZE;
 }
 
 Player::~Player() {
@@ -30,7 +37,14 @@ void Player::update(int mapWidth, int mapHeight, vector<vector<int>> map) {
 }
 
 void Player::render() {
-    TextureManager::Draw(playerTexture, { 0, 0, TILE_SIZE, TILE_SIZE }, rect); // render player
+    switch (facingDirection) {
+        case UP:    srcRect.x = 0 * TILE_SIZE; break;     // Assuming UP is at index 0 in row
+        case RIGHT:  srcRect.x = 1 * TILE_SIZE; break;     // Assuming DOWN is at index 1
+        case DOWN:  srcRect.x = 2 * TILE_SIZE; break;     // Assuming LEFT is at index 2
+        case LEFT: srcRect.x = 3 * TILE_SIZE; break;    // Assuming RIGHT is at index 3
+    }
+
+    SDL_RenderCopy(Game::renderer, playerTexture, &srcRect, &rect);
 }
 
 void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer) {
@@ -56,9 +70,9 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
     bool collision = false;
 
     // Iterate through TILES based on PLAYER's POTENTIAL NEW PIXEL POSITION
-    int startTileRow = std::max(0, newY / TILE_SIZE - 1);  // Calculate starting tile row in pixel space
+    int startTileRow = max(0, newY / TILE_SIZE - 1);  // Calculate starting tile row in pixel space
     int endTileRow = std::min(mapHeight / TILE_SIZE - 1, newY / TILE_SIZE + 1); // Calculate ending tile row in pixel space
-    int startTileCol = std::max(0, newX / TILE_SIZE - 1);  // Calculate starting tile col in pixel space
+    int startTileCol = max(0, newX / TILE_SIZE - 1);  // Calculate starting tile col in pixel space
     int endTileCol = std::min(mapWidth / TILE_SIZE - 1, newX / TILE_SIZE + 1); // Calculate ending tile col in pixel space
 
 
@@ -116,12 +130,3 @@ void Player::respawn() {
     rect.y = y * TILE_SIZE;
 }
 
-//// Inside Player.cpp
-//void Player::shoot(std::vector<Bullet*>& bullets, SDL_Texture* bulletTexture)
-//{
-//    //this function should be called by a key press,
-//    //so it must create a new bullet, at player current position.
-//    //remember the bullets array is owned by Game class
-//
-//    bullets.push_back(new Bullet(x, y, 0, -1, bulletTexture)); // You need to adjust the direction correctly, use directionX and directionY, like in your move
-//}

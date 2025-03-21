@@ -39,7 +39,8 @@ private:
     int y;             // Y coordinate in tile units
     int speed;         // Movement speed (pixels per step)
     SDL_Texture* playerTexture; // Texture for the player's image
-    SDL_Rect rect;      // Rectangle to define player's position and size
+    SDL_Rect rect;
+    SDL_Rect srcRect; // Source rectangle for sprite selection from the sheet!
 
     Uint32 lastShotTime;  // Time of the last shot (in milliseconds)
     const Uint32 fireRate; // Minimum time between shots (in milliseconds)

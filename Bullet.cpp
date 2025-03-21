@@ -1,9 +1,14 @@
 #include "Bullet.h"
 #include "TextureManager.h"
 #include "Game.h" // Include Game.h for map and renderer access
+#include "Player.h"
 #include <iostream>
 
 using namespace std;
+
+const int Bullet::SPRITE_WIDTH = 16;   // <--- Make sure these are present and correct
+const int Bullet::SPRITE_HEIGHT = 16;  // <--- Make sure these are present and correct
+const int Bullet::SPRITES_PER_ROW = 4; // <--- **ADD THIS MISSING DEFINITION!**
 
 Bullet::Bullet(int startX, int startY, int directionX, int directionY, const char* texturePath)
     : x(startX), y(startY), velocityX(directionX * 10.0f), velocityY(directionY * 10.0f), active(true) {
@@ -13,8 +18,33 @@ Bullet::Bullet(int startX, int startY, int directionX, int directionY, const cha
     }
     rect.x = x;
     rect.y = y;
-    rect.w = 16; // Adjust bullet width as needed
-    rect.h = 16; // Adjust bullet height as needed
+    rect.w = Bullet::SPRITE_WIDTH; // Use Bullet::SPRITE_WIDTH
+    rect.h = Bullet::SPRITE_HEIGHT; // Use Bullet::SPRITE_HEIGHT
+
+    // Initialize source rectangle to select the FIRST sprite (e.g., for UP direction, or a default sprite)
+    srcRect.x = 0;
+    srcRect.y = 0;
+    srcRect.w = Bullet::SPRITE_WIDTH; // Use Bullet::SPRITE_WIDTH
+    srcRect.h = Bullet::SPRITE_HEIGHT; // Use Bullet::SPRITE_HEIGHT
+
+
+    // --- REMOVE the global FacingDirection and make it a local variable (if needed temporarily) ---
+    // FacingDirection facingDirection;  <--- REMOVE THIS GLOBAL LINE!
+    FacingDirection localFacingDirection = LEFT; // Use a local variable here if you need to determine direction
+
+    if (directionX < 0) localFacingDirection = LEFT;
+    else if (directionX > 0) localFacingDirection = RIGHT;
+    else if (directionY < 0) localFacingDirection = UP;
+    else if (directionY > 0) localFacingDirection = DOWN;
+
+    // --- Sprite selection based on direction (example - adjust to your sprite sheet layout) ---
+    switch (localFacingDirection) { // Use the LOCAL variable
+    case UP:    srcRect.x = 0 * Bullet::SPRITE_WIDTH; break;     // Assuming UP is at index 0
+    case RIGHT: srcRect.x = 1 * Bullet::SPRITE_WIDTH; break;     // Assuming RIGHT is at index 1
+    case DOWN:  srcRect.x = 2 * Bullet::SPRITE_WIDTH; break;     // Assuming DOWN is at index 2
+    case LEFT:  srcRect.x = 3 * Bullet::SPRITE_WIDTH; break;     // Assuming LEFT is at index 3
+    default:    srcRect.x = 0 * Bullet::SPRITE_WIDTH; break;     // Default to UP if direction unknown
+    }
 }
 
 Bullet::~Bullet() {
@@ -91,6 +121,7 @@ void Bullet::update() {
 void Bullet::render() {
     if (active) {
         //TextureManager::Draw(texture, NULL, rect); // Render bullet if active
-        SDL_RenderCopy(Game::renderer, texture, NULL, &rect);
+
+        SDL_RenderCopy(Game::renderer, texture, &srcRect , &rect);
     }
 }

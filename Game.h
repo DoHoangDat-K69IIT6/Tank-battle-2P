@@ -5,14 +5,14 @@
 #include <SDL_ttf.h>
 #include <vector>
 
+const int TILE_SIZE = 35;
+
 const int SCREEN_WIDTH = 1366;
 const int SCREEN_HEIGHT = 768;
 const int BUTTON_WIDTH = 350;
 const int BUTTON_HEIGHT = 90;
 const int BUTTON_SPACE = 100;
 
-
-const int TILE_SIZE = 35;
 
 const int PLAYER1_START_POS_X = 0;
 const int PLAYER1_START_POS_Y = 0;
