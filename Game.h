@@ -78,6 +78,9 @@ private:
     // texture cua map
     SDL_Texture* wallTexture;   // Texture for indestructible walls
     SDL_Texture* wall2Texture; // Texture for walls that can be destroyed (2 hits)
+    SDL_Texture* wall2Texture_damaged1;
+    SDL_Texture* wall2Texture_damaged2;
+
     SDL_Texture* star3Texture; // Texture for 3x3 stars
     SDL_Texture* flagTexture; // Texture for flag
     SDL_Texture* star5Texture; // Texture for 5x5 stars

@@ -61,13 +61,19 @@ void Bullet::update() {
                     std::cout << "  Bullet Corner Collision with Indestructible Wall! Deactivating bullet." << std::endl;
                     break; // No need to check other corners, collision found
                 }
-                else if (tileType == 2) { // Destructible Wall (2 hits)
+                else if (tileType == 2) { // Destructible Wall (3 hits)
                     map[tileRow][tileCol] = 3; // Change to 1-hit remaining wall (type 3)
                     collisionDetected = true;
-                    std::cout << "  Bullet Corner Collision with Destructible Wall (2 hits -> 1 hit)! Deactivating bullet." << std::endl;
+                    std::cout << "  Bullet Corner Collision with Destructible Wall (3 hits -> 2 hit)! Deactivating bullet." << std::endl;
                     break;
                 }
-                else if (tileType == 3) { // Destructible Wall (1 hit remaining)
+                else if (tileType == 3) { // Destructible Wall (2 hit remaining)
+                    map[tileRow][tileCol] = 4; // Destroy the wall (set to empty)
+                    collisionDetected = true;
+                    std::cout << "  Bullet Corner Collision with Destructible Wall (2 hit -> 1 hit)! Deactivating bullet." << std::endl;
+                    break;
+                }
+                else if (tileType == 4) { // Destructible Wall (1 hit remaining)
                     map[tileRow][tileCol] = 0; // Destroy the wall (set to empty)
                     collisionDetected = true;
                     std::cout << "  Bullet Corner Collision with Destructible Wall (1 hit -> Destroyed)! Deactivating bullet." << std::endl;
@@ -84,6 +90,7 @@ void Bullet::update() {
 
 void Bullet::render() {
     if (active) {
-        TextureManager::Draw(texture, { 0, 0, 16, 16 }, rect); // Render bullet if active
+        //TextureManager::Draw(texture, NULL, rect); // Render bullet if active
+        SDL_RenderCopy(Game::renderer, texture, NULL, &rect);
     }
 }

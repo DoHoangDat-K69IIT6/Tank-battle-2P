@@ -127,6 +127,18 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false; // Or handle the error appropriately
     }
 
+    wall2Texture_damaged1 = TextureManager::LoadTexture("assets/wall2_damaged1.png"); // Replace with your actual filename
+    if (!wall2Texture_damaged1) {
+        std::cerr << "Failed to load wall2_damaged1 texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
+    wall2Texture_damaged2 = TextureManager::LoadTexture("assets/wall2_damaged2.png"); // Replace with your actual filename
+    if (!wall2Texture_damaged2) {
+        std::cerr << "Failed to load wall2_damaged2 texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
     //star3Texture = TextureManager::LoadTexture("assets/star3.png"); // Replace with your actual filename
     //if (!star3Texture) {
     //    std::cerr << "Failed to load star3 texture!" << std::endl;
@@ -577,6 +589,12 @@ void Game::renderMap() {
                 break;
             case 2:
                 SDL_RenderCopy(renderer, wall2Texture, NULL, &destRect);  // Draw wall texture
+                break;
+            case 3:
+                SDL_RenderCopy(renderer, wall2Texture_damaged1, NULL, &destRect);  // Draw wall texture
+                break;
+            case 4:
+                SDL_RenderCopy(renderer, wall2Texture_damaged2, NULL, &destRect);  // Draw wall texture
                 break;
             //case 7:
             //    TextureManager::Draw(star3Texture, srcRect, destRect); // Draw wall texture
