@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\DEV\SDL2_ttf-2.24.0\lib\x64;C:\DEV\SDL2_image\lib\x64;C:\DEV\SDL2-devel-2.32.0-VC\SDL2-2.32.0\lib\x64;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\DEV\SDL2_ttf-2.24.0\include;C:\DEV\SDL2_image\include;C:\DEV\SDL2-devel-2.32.0-VC\SDL2-2.32.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\DEV\SDL2_mixer-devel-2.8.1-VC\SDL2_mixer-2.8.1\lib\x64;C:\DEV\SDL2_ttf-2.24.0\lib\x64;C:\DEV\SDL2_image\lib\x64;C:\DEV\SDL2-devel-2.32.0-VC\SDL2-2.32.0\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\DEV\SDL2_mixer-devel-2.8.1-VC\SDL2_mixer-2.8.1\include;C:\DEV\SDL2_ttf-2.24.0\include;C:\DEV\SDL2_image\include;C:\DEV\SDL2-devel-2.32.0-VC\SDL2-2.32.0\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,11 +108,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\DEV\SDL2_mixer-devel-2.8.1-VC\SDL2_mixer-2.8.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(OutDir)assets"

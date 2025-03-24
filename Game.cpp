@@ -6,6 +6,7 @@
 #include <fstream>
 #include "Bullet.h"
 
+
 using namespace std;
 
 
@@ -188,6 +189,42 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     std::cout << "Target P2 Tile Coordinates (Hardcoded): (" << targetP2TileCol << ", " << targetP2TileRow << ")" << std::endl;
     // --- End Hardcoded Target Tile Coordinates ---
 
+    // --- Initialize SDL_mixer ---
+    if (Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG) == 0) { // Initialize support for MP3 and OGG (common formats)
+        std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false; // Return false to indicate initialization failure
+    }
+
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { // Open audio device
+        std::cerr << "SDL_mixer could not open audio! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false; // Return false if audio opening fails
+    }
+    cout << "SDL_mixer Initialized!..." << endl;
+    // --- End SDL_mixer Initialization ---
+
+    // --- Load Sound Effects ---
+    fireSound = Mix_LoadWAV("assets/sound/fire_sound.wav"); // Replace "assets/fire_sound.wav" with your actual file path
+    if (!fireSound) {
+        std::cerr << "Failed to load fire sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false;
+    }
+
+    hitSound = Mix_LoadWAV("assets/sound/hit_sound.wav");   // Replace "assets/hit_sound.wav" with your actual file path
+    if (!hitSound) {
+        std::cerr << "Failed to load hit sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false;
+    }
+
+    winSound = Mix_LoadWAV("assets/sound/win_sound.wav");   // Replace "assets/win_sound.wav" with your actual file path
+    if (!winSound) {
+        std::cerr << "Failed to load win sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false;
+    }
+
+    // ... load other sound effects if needed ...
+    cout << "Sound Effects Loaded!..." << std::endl;
+    // --- End Load Sound Effects ---
+
     return true;
 }
 
@@ -243,6 +280,7 @@ void Game::update() {
                 bulletRect.y + bulletRect.h > player1Rect.y)
             {
                 bullets[i]->deactivate(); // Deactivate bullet
+                Mix_PlayChannel(-1, hitSound, 0); // Play hit sound
                 player1->respawn();      // Player 1 respawns (you can change this to health decrease etc.)
                 cout << "Player 1 hit!" << endl;
             }
@@ -254,6 +292,7 @@ void Game::update() {
                 bulletRect.y + bulletRect.h > player2Rect.y)
             {
                 bullets[i]->deactivate(); // Deactivate bullet
+                Mix_PlayChannel(-1, hitSound, 0); // Play hit sound
                 player2->respawn();      // Player 2 respawns
                 cout << "Player 2 hit!" << endl;
             }
@@ -282,11 +321,13 @@ void Game::update() {
 
         if (p1TileCol == targetP1TileCol && p1TileRow == targetP1TileRow) {
             std::cout << "Player 1 Wins! (Tile Coordinates Match)" << std::endl;
+            Mix_PlayChannel(-1, winSound, 0); // Play win sound
             Game::setGameState(GAME_OVER);
             Game::setWinner(1);
         }
         else if (p2TileCol == targetP2TileCol && p2TileRow == targetP2TileRow) {
             std::cout << "Player 2 Wins! (Tile Coordinates Match)" << std::endl;
+			Mix_PlayChannel(-1, winSound, 0); // Play win sound
             Game::setGameState(GAME_OVER);
             Game::setWinner(2);
         }
@@ -484,6 +525,29 @@ void Game::clean() {
     }
     bullets.clear(); // Clear the bullets vector
 
+    // --- SDL_mixer Cleanup ---
+    if (fireSound) {
+        Mix_FreeChunk(fireSound); // Free the fire sound chunk
+        fireSound = nullptr;
+    }
+    if (hitSound) {
+        Mix_FreeChunk(hitSound);  // Free the hit sound chunk
+        hitSound = nullptr;
+    }
+    if (winSound) {
+        Mix_FreeChunk(winSound);  // Free the win sound chunk
+        winSound = nullptr;
+    }
+
+    Mix_CloseAudio(); // Close the audio device
+    Mix_Quit();       // Quit SDL_mixer
+    cout << "SDL_mixer Cleaned!..." << std::endl;
+    // --- End SDL_mixer Cleanup ---
+
+    TTF_Quit();
+    SDL_Quit();
+    std::cout << "Game Cleaned" << std::endl;
+
     SDL_Quit();
     std::cout << "Game Cleaned" << std::endl;
 }
@@ -547,6 +611,9 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 "assets/bullet_spritesheet.png"
             );
             bullets.push_back(bullet);
+
+			// --- Play Fire Sound Effect ---
+			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
         }
     }
     if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
@@ -575,6 +642,9 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 "assets/bullet_spritesheet.png"
             );
             bullets.push_back(bullet);
+
+			// --- Play Fire Sound Effect ---
+			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
         }
     }
 }

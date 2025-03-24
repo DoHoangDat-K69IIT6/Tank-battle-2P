@@ -4,6 +4,7 @@
 #include "Player.h"
 #include <SDL_ttf.h>
 #include <vector>
+#include <SDL_mixer.h>
 
 const int TILE_SIZE = 35;
 
@@ -122,5 +123,9 @@ private:
     void renderHighScore(); // Placeholder
     void renderCredits();   // Placeholder
 
+    Mix_Music* music;       // For background music (if you add music later)
+    Mix_Chunk* fireSound;   // For player shooting sound
+    Mix_Chunk* hitSound;    // For player hit sound
+    Mix_Chunk* winSound;    // For win sound effect
 };
 

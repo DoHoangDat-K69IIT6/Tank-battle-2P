@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 
     game = new Game();
 
-    game->init("Tank battle 2P", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, true);
+    game->init("Tank battle 2P", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, false);
 
     while (game->running()) {
         frameStart = SDL_GetTicks();
