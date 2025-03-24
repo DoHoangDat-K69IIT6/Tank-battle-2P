@@ -213,6 +213,8 @@ void Game::handleEvents() {
         case SDL_MOUSEBUTTONDOWN: // For menu clicks (only handled in MENU state)
             if (gameState == MENU) {
                 handleMenuEvents(event);
+            } else if (gameState == GAME_OVER) { // <--- NEW: Handle mouse click in GAME_OVER
+                resetGame(); // Reset game and return to menu
             }
             break;
         default:
@@ -307,6 +309,9 @@ void Game::render() {
         for (Bullet* bullet : bullets) { // Loop through ALL bullets, update and render
             bullet->render(); //The bullet check if it is active.
         }
+        break;
+    case GAME_OVER: // <--- NEW: Render Game Over screen
+        renderGameOver();
         break;
     case HIGH_SCORE:
         //renderHighScore();
@@ -686,4 +691,64 @@ void Game::copyFileContent(const std::string& sourceFilePath, const std::string&
     destFile.close();
 
     std::cout << "Noi dung cua '" << sourceFilePath << "' da duoc sao chep vao '" << destinationFilePath << "'" << std::endl;
+}
+
+void Game::renderGameOver() {
+    // Black background for Game Over screen
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black
+    SDL_RenderClear(renderer);
+
+    SDL_Color winTextColor = { 255, 255, 255, 255 }; // White text for win message
+    SDL_Color menuTextColor = { 200, 200, 200, 255 }; // Grayish for "click to menu"
+
+    // Determine win message based on winner
+    std::string winMessage;
+    if (Game::getWinner() == 1) {
+        winMessage = "Player 1 Wins!";
+    }
+    else if (Game::getWinner() == 2) {
+        winMessage = "Player 2 Wins!";
+    }
+    else {
+        winMessage = "It's a Tie! (How did that happen?)"; // Should not happen in your win condition, but good to have
+    }
+
+    // 1. Render "Player X Wins!" Text
+    SDL_Surface* winSurface = TTF_RenderText_Solid(titlefont, winMessage.c_str(), winTextColor);
+    SDL_Texture* winTexture = SDL_CreateTextureFromSurface(renderer, winSurface);
+    SDL_Rect winRect;
+    winRect.w = winSurface->w;
+    winRect.h = winSurface->h;
+    winRect.x = SCREEN_WIDTH / 2 - winSurface->w / 2; // Center horizontally
+    winRect.y = SCREEN_HEIGHT / 2 - winSurface->h / 2 - 50; // Position a bit above center
+    SDL_RenderCopy(renderer, winTexture, NULL, &winRect);
+    SDL_FreeSurface(winSurface);
+    SDL_DestroyTexture(winTexture);
+
+    // 2. Render "Click anywhere to return to menu" Text
+    SDL_Surface* menuSurface = TTF_RenderText_Solid(font, "Click anywhere to return to menu", menuTextColor);
+    SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
+    SDL_Rect menuRect;
+    menuRect.w = menuSurface->w;
+    menuRect.h = menuSurface->h;
+    menuRect.x = SCREEN_WIDTH / 2 - menuSurface->w / 2; // Center horizontally
+    menuRect.y = winRect.y + winRect.h + 30; // Position below win message
+    SDL_RenderCopy(renderer, menuTexture, NULL, &menuRect);
+    SDL_FreeSurface(menuSurface);
+    SDL_DestroyTexture(menuTexture);
+}
+
+void Game::resetGame() {
+    gameState = MENU; // Set game state back to MENU
+    winner = 0;      // Reset winner
+
+    player1->respawn(); // Respawn players to starting positions
+    player2->respawn();
+
+    bullets.clear();    // Clear all bullets
+
+    Game::copyFileContent("assets/scr_map.txt", "assets/map.txt"); // Reload map from source
+    loadMap("assets/map.txt"); // Actually load the map data again
+
+    std::cout << "Game Reset and Back to Menu" << std::endl;
 }

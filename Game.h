@@ -56,6 +56,8 @@ public:
     static int getWinner() { return winner; } // Static getter for winner
     static void setWinner(int playerNum) { winner = playerNum; } // Static setter for winner
 
+    TTF_Font* titlefont;
+
 private:
     SDL_Window* window;
     bool isRunning;
@@ -64,7 +66,7 @@ private:
 
     // Menu-related
     TTF_Font* font;
-    TTF_Font* titlefont;
+    
     SDL_Color textColor;
     SDL_Color buttonTextColor;
     SDL_Texture* menuBackgroundTexture; // background image
@@ -114,6 +116,9 @@ private:
 
     void copyFileContent(const std::string& sourceFilePath, const std::string& destinationFilePath);
 
+	void resetGame(); // Reset game state and player positions
+
+	void renderGameOver();
     void renderHighScore(); // Placeholder
     void renderCredits();   // Placeholder
 
