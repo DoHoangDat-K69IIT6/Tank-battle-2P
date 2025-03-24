@@ -25,6 +25,7 @@ Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), sp
     srcRect.y = 0; // And at the top row (y=0)
     srcRect.w = TILE_SIZE;
     srcRect.h = TILE_SIZE;
+
 }
 
 Player::~Player() {
@@ -118,9 +119,12 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
         y = newY;
         rect.x = x;
         rect.y = y;
+
+        
+
     }
 
-    std::cout << "Player::move - After:  x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl; // Debug print
+    //std::cout << "Player::move - After:  x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl; // Debug print
 }
 
 void Player::respawn() {

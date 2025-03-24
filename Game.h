@@ -51,11 +51,16 @@ public:
     static int getMapHeight() { return mapHeight; } // Static getter for mapHeight
     static vector<vector<int>>& getMap() { return map; } // Static getter for map
 
+    static GameState getGameState() { return gameState; } // Static getter for gameState
+    static void setGameState(GameState state) { gameState = state; } // Static setter for gameState
+    static int getWinner() { return winner; } // Static getter for winner
+    static void setWinner(int playerNum) { winner = playerNum; } // Static setter for winner
+
 private:
     SDL_Window* window;
     bool isRunning;
     int countthu = 0;
-    GameState gameState;
+    //GameState gameState;
 
     // Menu-related
     TTF_Font* font;
@@ -89,9 +94,15 @@ private:
     //bullet
     vector<Bullet*> bullets;
 
+    static GameState gameState; // <--- Make gameState static
+    static int winner;          // <--- Add static winner variable
+
     static vector<vector<int>> map; // <--- Add static here
     static int mapWidth;                     // <--- Add static here
     static int mapHeight;                    // <--- Add static here
+
+    int targetP1TileCol, targetP1TileRow; // Tile coordinates for Target P1
+    int targetP2TileCol, targetP2TileRow; // Tile coordinates for Target P2
 
     bool loadMap(const char* filePath);
     void renderMap();

@@ -15,6 +15,9 @@ std::vector<std::vector<int>> Game::map;      // Initialize static map
 int Game::mapWidth = 0;                       // Initialize static mapWidth
 int Game::mapHeight = 0;
 
+GameState Game::gameState = MENU;
+int Game::winner = 0; // Initialize static winner
+
 Game::Game() {
     window = nullptr;
     font = nullptr; 
@@ -175,7 +178,15 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     Game::copyFileContent("assets/scr_map.txt", "assets/map.txt");
     loadMap("assets/map.txt");
 
-  
+    // --- NEW: Hardcode Target TILE Coordinates ---
+    targetP1TileCol = 37; // Replace XX with the actual TILE COLUMN of Target P1 (tile type 8)
+    targetP1TileRow = 10; // Replace YY with the actual TILE ROW of Target P1 (tile type 8)
+    std::cout << "Target P1 Tile Coordinates (Hardcoded): (" << targetP1TileCol << ", " << targetP1TileRow << ")" << std::endl;
+
+    targetP2TileCol = 2; // Replace AA with the actual TILE COLUMN of Target P2 (tile type 5)
+    targetP2TileRow = 10; // Replace BB with the actual TILE ROW of Target P2 (tile type 5)
+    std::cout << "Target P2 Tile Coordinates (Hardcoded): (" << targetP2TileCol << ", " << targetP2TileRow << ")" << std::endl;
+    // --- End Hardcoded Target Tile Coordinates ---
 
     return true;
 }
@@ -254,6 +265,31 @@ void Game::update() {
             --i; // Adjust index after erasing
         }
     }
+
+    // --- NEW: Win condition check based on TILE coordinates ---
+    if (Game::gameState == PLAYING) { // Only check win condition if game is PLAYING
+        int p1TileCol = player1->getRect().x / TILE_SIZE; // Player 1 tile column 
+        int p1TileRow = player1->getRect().y / TILE_SIZE; // Player 1 tile row
+		/*cout << "Player 1 Tile Coordinates: (" << p1TileCol << ", " << p1TileRow << ")" << endl;
+		cout << "Player 1 Tile destination (" << targetP1TileCol << ", " << targetP1TileRow << ")" << endl;*/
+
+        int p2TileCol = player2->getRect().x / TILE_SIZE; // Player 2 tile column
+        int p2TileRow = player2->getRect().y / TILE_SIZE; // Player 2 tile row
+		/*cout << "Player 2 Tile Coordinates: (" << p2TileCol << ", " << p2TileRow << ")" << endl;
+		cout << "Player 2 Tile destination (" << targetP2TileCol << ", " << targetP2TileRow << ")" << endl;*/
+
+        if (p1TileCol == targetP1TileCol && p1TileRow == targetP1TileRow) {
+            std::cout << "Player 1 Wins! (Tile Coordinates Match)" << std::endl;
+            Game::setGameState(GAME_OVER);
+            Game::setWinner(1);
+        }
+        else if (p2TileCol == targetP2TileCol && p2TileRow == targetP2TileRow) {
+            std::cout << "Player 2 Wins! (Tile Coordinates Match)" << std::endl;
+            Game::setGameState(GAME_OVER);
+            Game::setWinner(2);
+        }
+    }
+    // --- End Win Condition Check ---
 }
 
 void Game::render() {

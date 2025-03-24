@@ -44,4 +44,6 @@ private:
 
     Uint32 lastShotTime;  // Time of the last shot (in milliseconds)
     const Uint32 fireRate; // Minimum time between shots (in milliseconds)
+
+    //const char* texturePath;
 };
