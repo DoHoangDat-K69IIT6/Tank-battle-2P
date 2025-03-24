@@ -82,7 +82,8 @@ private:
     SDL_Texture* wall2Texture_damaged2;
 
     SDL_Texture* star3Texture; // Texture for 3x3 stars
-    SDL_Texture* flagTexture; // Texture for flag
+    SDL_Texture* targetP1Texture; // Texture for target 1
+    SDL_Texture* targetP2Texture; // Texture for target 2
     SDL_Texture* star5Texture; // Texture for 5x5 stars
 
     //bullet
