@@ -1,4 +1,4 @@
-#include "Game.h"
+﻿#include "Game.h"
 #include <iostream>
 #include <SDL_ttf.h>
 #include "Player.h"
@@ -184,7 +184,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     targetP1TileRow = 10; // Replace YY with the actual TILE ROW of Target P1 (tile type 8)
     std::cout << "Target P1 Tile Coordinates (Hardcoded): (" << targetP1TileCol << ", " << targetP1TileRow << ")" << std::endl;
 
-    targetP2TileCol = 2; // Replace AA with the actual TILE COLUMN of Target P2 (tile type 5)
+    targetP2TileCol = 1; // Replace AA with the actual TILE COLUMN of Target P2 (tile type 5)
     targetP2TileRow = 10; // Replace BB with the actual TILE ROW of Target P2 (tile type 5)
     std::cout << "Target P2 Tile Coordinates (Hardcoded): (" << targetP2TileCol << ", " << targetP2TileRow << ")" << std::endl;
     // --- End Hardcoded Target Tile Coordinates ---
@@ -253,13 +253,12 @@ void Game::handleEvents() {
             else if (gameState == MENU) {
                 handleMenuEvents(event);   // Pass event to menu event handler
             }
-            else if (event.key.keysym.sym == SDLK_q) {
-                isRunning = false;
-            }
             break;
         case SDL_MOUSEBUTTONDOWN: // For menu clicks (only handled in MENU state)
             if (gameState == MENU) {
                 handleMenuEvents(event);
+            } else if (gameState == CREDITS) { // <--- NEW: Handle mouse click in CREDITS
+				setGameState(MENU); // Return to menu
             } else if (gameState == GAME_OVER) { // <--- NEW: Handle mouse click in GAME_OVER
                 resetGame(); // Reset game and return to menu
             }
@@ -372,11 +371,8 @@ void Game::render() {
     case GAME_OVER: // <--- NEW: Render Game Over screen
         renderGameOver();
         break;
-    //case QUIT:
-    //    //renderHighScore();
-    //    break;
     case CREDITS:
-        // renderCredits();
+        renderCredits();
         break;
     }
 
@@ -403,7 +399,7 @@ void Game::renderMenu() {
 
     // Button1: PLAY
     playButtonRect.x = SCREEN_WIDTH / 2 - BUTTON_WIDTH / 2; // horizontal center - half of button with
-    playButtonRect.y = 300; // titleRect.y + BUTTON_SPACE + 50; // spawn c�ch title = 1 but_space + 50 (+ 50 vao cho dep)
+    playButtonRect.y = 300; // titleRect.y + BUTTON_SPACE + 50; // spawn cách title = 1 but_space + 50 (+ 50 vao cho dep)
     playButtonRect.w = BUTTON_WIDTH; // button width
     playButtonRect.h = BUTTON_HEIGHT; // button height
     SDL_RenderCopy(renderer, playButtonNormalTexture, NULL, &playButtonRect); // render texture
@@ -487,7 +483,7 @@ void Game::handleMenuEvents(const SDL_Event& event) {
             gameState = PLAYING;
             std::cout << "PLAY button clicked!\n";
         }
-        // Check if HIGH SCORE button was clicked
+        // Check if CREDIT button was clicked
         else if (mouseX >= highScoreButtonRect.x && mouseX <= highScoreButtonRect.x + highScoreButtonRect.w &&
             mouseY >= highScoreButtonRect.y && mouseY <= highScoreButtonRect.y + highScoreButtonRect.h) {
             gameState = CREDITS;
@@ -845,4 +841,50 @@ void Game::resetGame() {
     loadMap("assets/map.txt"); // Actually load the map data again
 
     std::cout << "Game Reset and Back to Menu" << std::endl;
+}
+
+void Game::renderCredits() {
+    // Black background for Game Over screen
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Black
+    SDL_RenderClear(renderer);
+
+    SDL_Color hovaten = { 255, 255, 255, 255 }; // White text for win message
+    SDL_Color mssv = { 255, 255, 255, 255 }; // Grayish for "click to menu"
+	SDL_Color lhp = { 255, 255, 255, 255 }; 
+
+
+    // 1. Render hovaten
+    SDL_Surface* tenSurface = TTF_RenderText_Solid(titlefont, "DO HOANG DAT", hovaten);
+    SDL_Texture* tenTexture = SDL_CreateTextureFromSurface(renderer, tenSurface);
+    SDL_Rect tenRect;
+    tenRect.w = tenSurface->w;
+    tenRect.h = tenSurface->h;
+    tenRect.x = SCREEN_WIDTH / 2 - tenSurface->w / 2; // Center horizontally
+    tenRect.y = SCREEN_HEIGHT / 2 - tenSurface->h / 2 - 50; // Position a bit above center
+    SDL_RenderCopy(renderer, tenTexture, NULL, &tenRect);
+    SDL_FreeSurface(tenSurface);
+    SDL_DestroyTexture(tenTexture);
+
+    // 2. Render mssv
+    SDL_Surface* mssvSurface = TTF_RenderText_Solid(font, "24020060", mssv);
+    SDL_Texture* mssvTexture = SDL_CreateTextureFromSurface(renderer, mssvSurface);
+    SDL_Rect mssvRect;
+    mssvRect.w = mssvSurface->w;
+    mssvRect.h = mssvSurface->h;
+    mssvRect.x = SCREEN_WIDTH / 2 - mssvSurface->w / 2; // Center horizontally
+    mssvRect.y = tenRect.y + tenRect.h + 30; // Position below win message
+    SDL_RenderCopy(renderer, mssvTexture, NULL, &mssvRect);
+    SDL_FreeSurface(mssvSurface);
+    SDL_DestroyTexture(mssvTexture);
+
+    SDL_Surface* lhpSurface = TTF_RenderText_Solid(font, "INT2215-4 Nhom 2", lhp);
+    SDL_Texture* lhpTexture = SDL_CreateTextureFromSurface(renderer, lhpSurface);
+    SDL_Rect lhpRect;
+    lhpRect.w = lhpSurface->w;
+    lhpRect.h = lhpSurface->h;
+    lhpRect.x = SCREEN_WIDTH / 2 - lhpSurface->w / 2; // Center horizontally
+    lhpRect.y = mssvRect.y + mssvRect.h + 30; // Position below win message
+    SDL_RenderCopy(renderer, lhpTexture, NULL, &lhpRect);
+    SDL_FreeSurface(lhpSurface);
+    SDL_DestroyTexture(lhpTexture);
 }

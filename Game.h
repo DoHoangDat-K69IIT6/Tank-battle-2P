@@ -120,7 +120,6 @@ private:
 	void resetGame(); // Reset game state and player positions
 
 	void renderGameOver();
-    void renderHighScore(); // Placeholder
     void renderCredits();   // Placeholder
 
     Mix_Music* music;       // For background music (if you add music later)
