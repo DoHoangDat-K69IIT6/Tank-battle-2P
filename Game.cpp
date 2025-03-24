@@ -221,6 +221,16 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false;
     }
 
+    // --- Load Background Music ---
+    music = Mix_LoadMUS("assets/sound/music.wav"); // Replace "assets/music.wav" with your actual music file path
+    if (!music) {
+        std::cerr << "Failed to load background music! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false;
+    }
+    cout << "Background Music Loaded!..." << std::endl;
+    // --- End Load Background Music ---
+    
+   
     // ... load other sound effects if needed ...
     cout << "Sound Effects Loaded!..." << std::endl;
     // --- End Load Sound Effects ---
@@ -333,6 +343,14 @@ void Game::update() {
         }
     }
     // --- End Win Condition Check ---
+
+    // --- Start Background Music (if not already playing and in PLAYING state) ---
+    if (gameState == PLAYING && Mix_PlayingMusic() == 0) { // Check game state and if music is NOT already playing
+        if (Mix_PlayMusic(music, -1) == -1) { // Start playing music, loop infinitely (-1)
+            std::cerr << "Failed to play background music! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        }
+    }
+    // --- End Background Music Start ---
 }
 
 void Game::render() {
@@ -354,9 +372,9 @@ void Game::render() {
     case GAME_OVER: // <--- NEW: Render Game Over screen
         renderGameOver();
         break;
-    case HIGH_SCORE:
-        //renderHighScore();
-        break;
+    //case QUIT:
+    //    //renderHighScore();
+    //    break;
     case CREDITS:
         // renderCredits();
         break;
@@ -416,7 +434,7 @@ void Game::renderMenu() {
     SDL_RenderCopy(renderer, highScoreButtonNormalTexture, NULL, &highScoreButtonRect);
     //SDL_RenderFillRect(renderer, &highScoreButtonRect);
 
-    SDL_Surface* highScoreSurface = TTF_RenderText_Solid(font, "HIGH SCORE", buttonTextColor);
+    SDL_Surface* highScoreSurface = TTF_RenderText_Solid(font, "CREDIT", buttonTextColor);
     SDL_Texture* highScoreTexture = SDL_CreateTextureFromSurface(renderer, highScoreSurface);
     SDL_Rect highScoreTextRect;
     highScoreTextRect.w = highScoreSurface->w;
@@ -437,7 +455,7 @@ void Game::renderMenu() {
     SDL_RenderCopy(renderer, creditsButtonNormalTexture, NULL, &creditsButtonRect);
     //SDL_RenderFillRect(renderer, &creditsButtonRect);
 
-    SDL_Surface* creditsSurface = TTF_RenderText_Solid(font, "CREDITS", buttonTextColor);
+    SDL_Surface* creditsSurface = TTF_RenderText_Solid(font, "QUIT", buttonTextColor);
     SDL_Texture* creditsTexture = SDL_CreateTextureFromSurface(renderer, creditsSurface);
     SDL_Rect creditsTextRect;
     creditsTextRect.w = creditsSurface->w;
@@ -472,14 +490,15 @@ void Game::handleMenuEvents(const SDL_Event& event) {
         // Check if HIGH SCORE button was clicked
         else if (mouseX >= highScoreButtonRect.x && mouseX <= highScoreButtonRect.x + highScoreButtonRect.w &&
             mouseY >= highScoreButtonRect.y && mouseY <= highScoreButtonRect.y + highScoreButtonRect.h) {
-            gameState = HIGH_SCORE;
-            std::cout << "HIGH SCORE button clicked!\n";
+            gameState = CREDITS;
+            std::cout << "CREDITS button clicked!\n";
         }
         // Check if CREDITS button was clicked
         else if (mouseX >= creditsButtonRect.x && mouseX <= creditsButtonRect.x + creditsButtonRect.w &&
             mouseY >= creditsButtonRect.y && mouseY <= creditsButtonRect.y + creditsButtonRect.h) {
-            gameState = CREDITS;
-            std::cout << "CREDITS button clicked!\n";
+            gameState = QUIT;
+            std::cout << "QUIT button clicked!\n";
+			isRunning = false;
         }
         break;
     }
@@ -538,6 +557,11 @@ void Game::clean() {
         Mix_FreeChunk(winSound);  // Free the win sound chunk
         winSound = nullptr;
     }
+
+	if (music) {
+		Mix_FreeMusic(music);     // Free the music
+		music = nullptr;
+	}
 
     Mix_CloseAudio(); // Close the audio device
     Mix_Quit();       // Quit SDL_mixer

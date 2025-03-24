@@ -30,7 +30,7 @@ enum GameState {
     MENU,
     PLAYING,
     GAME_OVER,
-    HIGH_SCORE,
+    QUIT,
     CREDITS
 };
 
