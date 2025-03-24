@@ -78,7 +78,7 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
 
     for (int row = startTileRow; row <= endTileRow; ++row) { // Iterate through tile rows
         for (int col = startTileCol; col <= endTileCol; ++col) { // Iterate through tile cols
-            if (map[row][col] == 1 || map[row][col] == 2) {
+            if (map[row][col] == 1 || map[row][col] == 2 || map[row][col] == 3 || map[row][col] == 4) {
                 SDL_Rect wallRect;
                 wallRect.x = col * TILE_SIZE; // Wall rect in PIXEL coordinates
                 wallRect.y = row * TILE_SIZE; // Wall rect in PIXEL coordinates

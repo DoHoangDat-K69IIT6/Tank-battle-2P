@@ -66,7 +66,7 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
         renderer = SDL_CreateRenderer(window, -1, 0);
         if (renderer) {
-            SDL_SetRenderDrawColor(renderer, 179, 235, 242, 0); // xanh mau pastel (179,235,242)
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); // xanh mau pastel (179,235,242)
             cout << "Renderer created!" << endl;
             isRunning = true;
         }
@@ -162,12 +162,14 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
     // khoi tao nguoi choi
 
-    player1 = new Player(175, 350, "assets/green_tank1_spritesheet.png");
-    player2 = new Player(1155, 350, "assets/green_tank1_spritesheet.png");
+    player1 = new Player(175, 350, "assets/green_tank_spritesheet.png");
+    player2 = new Player(1155, 350, "assets/red_tank_spritesheet.png");
 
     // khoi tao map
     Game::copyFileContent("assets/scr_map.txt", "assets/map.txt");
     loadMap("assets/map.txt");
+
+  
 
     return true;
 }
@@ -180,6 +182,7 @@ void Game::handleEvents() {
             isRunning = false;
             break;
         case SDL_KEYDOWN: // Just call handlePlayingEvents for KEYDOWN in PLAYING state
+        case SDL_KEYUP:
             if (gameState == PLAYING) {
                 handlePlayingEvents(event); // Pass event to playing event handler
             }
