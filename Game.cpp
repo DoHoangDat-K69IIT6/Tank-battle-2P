@@ -142,18 +142,6 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false; // Or handle the error appropriately
     }
 
-    //star3Texture = TextureManager::LoadTexture("assets/star3.png"); // Replace with your actual filename
-    //if (!star3Texture) {
-    //    std::cerr << "Failed to load star3 texture!" << std::endl;
-    //    return false; // Or handle the error appropriately
-    //}
-
-    //star5Texture = TextureManager::LoadTexture("assets/star5.png"); // Replace with your actual filename
-    //if (!star5Texture) {
-    //    std::cerr << "Failed to load star5 texture!" << std::endl;
-    //    return false; // Or handle the error appropriately
-    //}
-
     targetP1Texture = TextureManager::LoadTexture("assets/targetP1.jpeg"); // Replace with your actual filename
     if (!targetP1Texture) {
         std::cerr << "Failed to load target 1 texture!" << std::endl;
@@ -163,6 +151,18 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     targetP2Texture = TextureManager::LoadTexture("assets/targetP2.jpeg"); // Replace with your actual filename
     if (!targetP2Texture) {
         std::cerr << "Failed to load target 2 texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
+    buff3x3Texture = TextureManager::LoadTexture("assets/buff3x3.png"); // Replace with your actual filename
+    if (!buff3x3Texture) {
+        std::cerr << "Failed to load star3 texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
+    buff5x5Texture = TextureManager::LoadTexture("assets/buff5x5.png"); // Replace with your actual filename
+    if (!buff5x5Texture) {
+        std::cerr << "Failed to load star5 texture!" << std::endl;
         return false; // Or handle the error appropriately
     }
 
@@ -646,18 +646,18 @@ void Game::renderMap() {
             case 4:
                 SDL_RenderCopy(renderer, wall2Texture_damaged2, NULL, &destRect);  // Draw wall texture
                 break;
-            //case 7:
-            //    TextureManager::Draw(star3Texture, srcRect, destRect); // Draw wall texture
-            //    break;
             case 8:
                 SDL_RenderCopy(renderer ,targetP1Texture, NULL, &destRect); // Draw target1 texture
                 break;
             case 5:
                 SDL_RenderCopy(renderer, targetP2Texture, NULL, &destRect); // Draw target2 texture
                 break;
-            //case 9:
-            //    TextureManager::Draw(star5Texture, srcRect, destRect); // Draw wall texture
-            //    break;
+            case 7:
+                SDL_RenderCopy(renderer, buff3x3Texture, NULL, &destRect); // Draw target2 texture
+                break;
+            case 9:
+                SDL_RenderCopy(renderer, buff5x5Texture, NULL, &destRect); // Draw target2 texture
+                break;
             }
         }
     }
