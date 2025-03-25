@@ -238,6 +238,37 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     return true;
 }
 
+//void Game::handleEvents() {
+//    SDL_Event event;
+//    while (SDL_PollEvent(&event)) {
+//        switch (event.type) {
+//        case SDL_QUIT:
+//            isRunning = false;
+//            break;
+//        case SDL_KEYDOWN: // Just call handlePlayingEvents for KEYDOWN in PLAYING state
+//        case SDL_KEYUP:
+//            if (gameState == PLAYING) {
+//                handlePlayingEvents(event); // Pass event to playing event handler
+//            }
+//            else if (gameState == MENU) {
+//                handleMenuEvents(event);   // Pass event to menu event handler
+//            }
+//            break;
+//        case SDL_MOUSEBUTTONDOWN: // For menu clicks (only handled in MENU state)
+//            if (gameState == MENU) {
+//                handleMenuEvents(event);
+//            } else if (gameState == CREDITS) { // <--- NEW: Handle mouse click in CREDITS
+//				setGameState(MENU); // Return to menu
+//            } else if (gameState == GAME_OVER) { // <--- NEW: Handle mouse click in GAME_OVER
+//                resetGame(); // Reset game and return to menu
+//            }
+//            break;
+//        default:
+//            break;
+//        }
+//    }
+//}
+
 void Game::handleEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -254,12 +285,14 @@ void Game::handleEvents() {
                 handleMenuEvents(event);   // Pass event to menu event handler
             }
             break;
-        case SDL_MOUSEBUTTONDOWN: // For menu clicks (only handled in MENU state)
+        case SDL_MOUSEBUTTONDOWN:
             if (gameState == MENU) {
                 handleMenuEvents(event);
-            } else if (gameState == CREDITS) { // <--- NEW: Handle mouse click in CREDITS
-				setGameState(MENU); // Return to menu
-            } else if (gameState == GAME_OVER) { // <--- NEW: Handle mouse click in GAME_OVER
+            }
+            else if (gameState == CREDITS) {
+                setGameState(MENU); // Return to menu
+            }
+            else if (gameState == GAME_OVER) {
                 resetGame(); // Reset game and return to menu
             }
             break;
@@ -350,6 +383,38 @@ void Game::update() {
         }
     }
     // --- End Background Music Start ---
+
+    if (gameState == PLAYING) {
+        const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+
+        // Player 1 movement (WASD)
+        if (keyboardState[SDL_SCANCODE_W]) {
+            player1->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);
+        }
+        if (keyboardState[SDL_SCANCODE_S]) {
+            player1->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);
+        }
+        if (keyboardState[SDL_SCANCODE_A]) {
+            player1->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);
+        }
+        if (keyboardState[SDL_SCANCODE_D]) {
+            player1->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);
+        }
+
+        // Player 2 movement (Arrow Keys)
+        if (keyboardState[SDL_SCANCODE_UP]) {
+            player2->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);
+        }
+        if (keyboardState[SDL_SCANCODE_DOWN]) {
+            player2->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);
+        }
+        if (keyboardState[SDL_SCANCODE_LEFT]) {
+            player2->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);
+        }
+        if (keyboardState[SDL_SCANCODE_RIGHT]) {
+            player2->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);
+        }
+    }
 }
 
 void Game::render() {
@@ -573,102 +638,160 @@ void Game::clean() {
 }
 
 
+//void Game::handlePlayingEvents(const SDL_Event& event) {
+//    const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+//
+//	if (keyboardState[SDL_SCANCODE_ESCAPE]) {
+//		setGameState(MENU);
+//	}
+//
+//    // Player 1 Movement (WASD) - Pass player2 as the otherPlayer
+//    if (keyboardState[SDL_SCANCODE_W]) {
+//        player1->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
+//    }
+//    if (keyboardState[SDL_SCANCODE_S]) {
+//        player1->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
+//    }
+//    if (keyboardState[SDL_SCANCODE_A]) {
+//        player1->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
+//    }
+//    if (keyboardState[SDL_SCANCODE_D]) {
+//        player1->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
+//    }
+//
+//
+//    // Player 2 Movement (Arrow Keys) - Pass player1 as the otherPlayer
+//    if (keyboardState[SDL_SCANCODE_UP]) {
+//        player2->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
+//    }
+//    if (keyboardState[SDL_SCANCODE_DOWN]) {
+//        player2->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);  // Pass player1
+//    }
+//    if (keyboardState[SDL_SCANCODE_LEFT]) {
+//        player2->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
+//    }
+//    if (keyboardState[SDL_SCANCODE_RIGHT]) {
+//        player2->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
+//    }
+//
+//    if (keyboardState[SDL_SCANCODE_SPACE]) { // Player 1 shoots with SPACE
+//        Uint32 currentTime = SDL_GetTicks();
+//        if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) { // Fire rate check
+//
+//            player1->setLastShotTime(currentTime); // Update last shot time
+//
+//            FacingDirection p1Facing = player1->getFacingDirection();
+//            int bulletDirX = 0;
+//            int bulletDirY = 0;
+//            int spawnOffsetX = 0;
+//            int spawnOffsetY = 0;
+//
+//			switch (p1Facing) {
+//                case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+//                case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+//                case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+//                case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+//            }
+//
+//            Bullet* bullet = new Bullet(
+//                player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
+//                player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
+//                bulletDirX, bulletDirY,
+//                "assets/bullet_spritesheet.png"
+//            );
+//            bullets.push_back(bullet);
+//
+//			// --- Play Fire Sound Effect ---
+//			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
+//        }
+//    }
+//    if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
+//        Uint32 currentTime = SDL_GetTicks();
+//        if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) { // Fire rate check
+//
+//            player2->setLastShotTime(currentTime); // Update last shot time
+//
+//            FacingDirection p2Facing = player2->getFacingDirection();
+//            int bulletDirX = 0;
+//            int bulletDirY = 0;
+//            int spawnOffsetX = 0;
+//            int spawnOffsetY = 0;
+//
+//            switch (p2Facing) {
+//            case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+//            case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+//            case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+//            case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+//            }
+//
+//            Bullet* bullet = new Bullet(
+//                player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
+//                player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
+//                bulletDirX, bulletDirY,
+//                "assets/bullet_spritesheet.png"
+//            );
+//            bullets.push_back(bullet);
+//
+//			// --- Play Fire Sound Effect ---
+//			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
+//        }
+//    }
+//}
+
 void Game::handlePlayingEvents(const SDL_Event& event) {
-    const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-
-	if (keyboardState[SDL_SCANCODE_ESCAPE]) {
-		setGameState(MENU);
-	}
-
-    // Player 1 Movement (WASD) - Pass player2 as the otherPlayer
-    if (keyboardState[SDL_SCANCODE_W]) {
-        player1->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
-    }
-    if (keyboardState[SDL_SCANCODE_S]) {
-        player1->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
-    }
-    if (keyboardState[SDL_SCANCODE_A]) {
-        player1->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
-    }
-    if (keyboardState[SDL_SCANCODE_D]) {
-        player1->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
-    }
-
-
-    // Player 2 Movement (Arrow Keys) - Pass player1 as the otherPlayer
-    if (keyboardState[SDL_SCANCODE_UP]) {
-        player2->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
-    }
-    if (keyboardState[SDL_SCANCODE_DOWN]) {
-        player2->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);  // Pass player1
-    }
-    if (keyboardState[SDL_SCANCODE_LEFT]) {
-        player2->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
-    }
-    if (keyboardState[SDL_SCANCODE_RIGHT]) {
-        player2->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
-    }
-
-    if (keyboardState[SDL_SCANCODE_SPACE]) { // Player 1 shoots with SPACE
-        Uint32 currentTime = SDL_GetTicks();
-        if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) { // Fire rate check
-
-            player1->setLastShotTime(currentTime); // Update last shot time
-
-            FacingDirection p1Facing = player1->getFacingDirection();
-            int bulletDirX = 0;
-            int bulletDirY = 0;
-            int spawnOffsetX = 0;
-            int spawnOffsetY = 0;
-
-			switch (p1Facing) {
+    if (event.type == SDL_KEYDOWN) {
+        if (event.key.keysym.sym == SDLK_SPACE) { // Player 1 shoots with SPACE
+            Uint32 currentTime = SDL_GetTicks();
+            if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) {
+                player1->setLastShotTime(currentTime);
+                FacingDirection p1Facing = player1->getFacingDirection();
+                int bulletDirX = 0;
+                int bulletDirY = 0;
+                int spawnOffsetX = 0;
+                int spawnOffsetY = 0;
+                switch (p1Facing) {
                 case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
                 case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
                 case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
                 case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+                }
+                Bullet* bullet = new Bullet(
+                    player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
+                    player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
+                    bulletDirX, bulletDirY,
+                    "assets/bullet_spritesheet.png"
+                );
+                bullets.push_back(bullet);
+                Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
             }
-
-            Bullet* bullet = new Bullet(
-                player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
-                player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
-                bulletDirX, bulletDirY,
-                "assets/bullet_spritesheet.png"
-            );
-            bullets.push_back(bullet);
-
-			// --- Play Fire Sound Effect ---
-			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
         }
-    }
-    if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
-        Uint32 currentTime = SDL_GetTicks();
-        if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) { // Fire rate check
-
-            player2->setLastShotTime(currentTime); // Update last shot time
-
-            FacingDirection p2Facing = player2->getFacingDirection();
-            int bulletDirX = 0;
-            int bulletDirY = 0;
-            int spawnOffsetX = 0;
-            int spawnOffsetY = 0;
-
-            switch (p2Facing) {
-            case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
-            case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
-            case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
-            case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+        else if (event.key.keysym.sym == SDLK_SLASH) { // Player 2 shoots with '/'
+            Uint32 currentTime = SDL_GetTicks();
+            if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) {
+                player2->setLastShotTime(currentTime);
+                FacingDirection p2Facing = player2->getFacingDirection();
+                int bulletDirX = 0;
+                int bulletDirY = 0;
+                int spawnOffsetX = 0;
+                int spawnOffsetY = 0;
+                switch (p2Facing) {
+                case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+                case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+                case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+                case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+                }
+                Bullet* bullet = new Bullet(
+                    player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
+                    player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
+                    bulletDirX, bulletDirY,
+                    "assets/bullet_spritesheet.png"
+                );
+                bullets.push_back(bullet);
+                Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
             }
-
-            Bullet* bullet = new Bullet(
-                player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
-                player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
-                bulletDirX, bulletDirY,
-                "assets/bullet_spritesheet.png"
-            );
-            bullets.push_back(bullet);
-
-			// --- Play Fire Sound Effect ---
-			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
+        }
+        else if (event.key.keysym.sym == SDLK_ESCAPE) {
+            setGameState(MENU); // Return to menu on ESC
         }
     }
 }

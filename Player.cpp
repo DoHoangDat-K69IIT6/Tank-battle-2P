@@ -119,9 +119,6 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
         y = newY;
         rect.x = x;
         rect.y = y;
-
-        
-
     }
 
     //std::cout << "Player::move - After:  x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl; // Debug print
