@@ -576,6 +576,10 @@ void Game::clean() {
 void Game::handlePlayingEvents(const SDL_Event& event) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
+	if (keyboardState[SDL_SCANCODE_ESCAPE]) {
+		setGameState(MENU);
+	}
+
     // Player 1 Movement (WASD) - Pass player2 as the otherPlayer
     if (keyboardState[SDL_SCANCODE_W]) {
         player1->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
@@ -617,11 +621,11 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
             int spawnOffsetX = 0;
             int spawnOffsetY = 0;
 
-            switch (p1Facing) {
-                case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
-                case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
-                case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
-                case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+			switch (p1Facing) {
+                case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+                case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+                case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+                case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
             }
 
             Bullet* bullet = new Bullet(
@@ -649,10 +653,10 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
             int spawnOffsetY = 0;
 
             switch (p2Facing) {
-            case UP:    bulletDirY = -1; spawnOffsetY = -20; break;
-            case DOWN:  bulletDirY = 1;  spawnOffsetY = 20;  break;
-            case LEFT:  bulletDirX = -1; spawnOffsetX = -20; break;
-            case RIGHT: bulletDirX = 1;  spawnOffsetX = 20;  break;
+            case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+            case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+            case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+            case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
             }
 
             Bullet* bullet = new Bullet(

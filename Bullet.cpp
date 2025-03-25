@@ -92,25 +92,25 @@ void Bullet::update() {
                     break; // No need to check other corners, collision found
                 }
                 else if (tileType == 2) { // Destructible Wall (3 hits)
-                    map[tileRow][tileCol] = 3; // Change to 1-hit remaining wall (type 3)
-                    collisionDetected = true;
-                    std::cout << "  Bullet Corner Collision with Destructible Wall (3 hits -> 2 hit)! Deactivating bullet." << std::endl;
-                    break;
+                            map[tileRow][tileCol] = 3; // Change to 1-hit remaining wall (type 3)
+                            collisionDetected = true;
+                            std::cout << "  Bullet Corner Collision with Destructible Wall (3 hits -> 2 hit)! Deactivating bullet." << std::endl;
+                            break;
+                        }
+                        else if (tileType == 3) { // Destructible Wall (2 hit remaining)
+                            map[tileRow][tileCol] = 4; // Destroy the wall (set to empty)
+                            collisionDetected = true;
+                            std::cout << "  Bullet Corner Collision with Destructible Wall (2 hit -> 1 hit)! Deactivating bullet." << std::endl;
+                            break;
+                        }
+                        else if (tileType == 4) { // Destructible Wall (1 hit remaining)
+                            map[tileRow][tileCol] = 0; // Destroy the wall (set to empty)
+                            collisionDetected = true;
+                            std::cout << "  Bullet Corner Collision with Destructible Wall (1 hit -> Destroyed)! Deactivating bullet." << std::endl;
+                            break;
+                        }
+                    }
                 }
-                else if (tileType == 3) { // Destructible Wall (2 hit remaining)
-                    map[tileRow][tileCol] = 4; // Destroy the wall (set to empty)
-                    collisionDetected = true;
-                    std::cout << "  Bullet Corner Collision with Destructible Wall (2 hit -> 1 hit)! Deactivating bullet." << std::endl;
-                    break;
-                }
-                else if (tileType == 4) { // Destructible Wall (1 hit remaining)
-                    map[tileRow][tileCol] = 0; // Destroy the wall (set to empty)
-                    collisionDetected = true;
-                    std::cout << "  Bullet Corner Collision with Destructible Wall (1 hit -> Destroyed)! Deactivating bullet." << std::endl;
-                    break;
-                }
-            }
-        }
 
         if (collisionDetected) {
             active = false; // Deactivate bullet if any corner collided
