@@ -4,12 +4,12 @@
 #include "Bullet.h"
 #include <iostream>
 
-const int SPEED = 5;
+const int SPEED = 2;
 
 using namespace std;
 
 
-Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), speed(SPEED), x(x), y(y), fireRate(700), facingDirection(UP) {
+Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), speed(SPEED), x(x), y(y), fireRate(500), facingDirection(UP), hasBuff(false) {
     playerTexture = TextureManager::LoadTexture(texturePath);
     if (!playerTexture) {
         cout << "Failed to load player texture!" << endl;
@@ -49,7 +49,7 @@ void Player::render() {
 }
 
 void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer) {
-    cout << "Player::move - Before: x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl;
+    // cout << "Player::move - Before: x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl;
 
     int newX = x + dx * SPEED;
     int newY = y + dy * SPEED;

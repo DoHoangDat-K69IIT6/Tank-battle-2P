@@ -30,6 +30,8 @@ public:
     Uint32 getLastShotTime() const { return lastShotTime; } // Getter for lastShotTime
     void setLastShotTime(Uint32 time) { lastShotTime = time; } // Setter for lastShotTime
     Uint32 getFireRate() const { return fireRate; }       // Getter for fireRate (read-only)
+
+    bool hasBuff; // Thêm bi?n ?? ki?m tra xem ng??i ch?i có buff hay không
 private:
     FacingDirection facingDirection;
 

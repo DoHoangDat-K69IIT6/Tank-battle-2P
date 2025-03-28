@@ -15,6 +15,8 @@ public:
     void deactivate() { active = false; } // Function to deactivate bullet explicitly
     // bool isActive() const { return active; }
 
+    bool isBuffBullet; // Thêm bi?n ?? ki?m tra xem ?ây có ph?i ??n buff không
+
 private:
 
     int x;

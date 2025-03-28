@@ -11,7 +11,7 @@ const int Bullet::SPRITE_HEIGHT = 16;  // <--- Make sure these are present and c
 const int Bullet::SPRITES_PER_ROW = 4; // <--- **ADD THIS MISSING DEFINITION!**
 
 Bullet::Bullet(int startX, int startY, int directionX, int directionY, const char* texturePath)
-    : x(startX), y(startY), velocityX(directionX * 10.0f), velocityY(directionY * 10.0f), active(true) {
+    : x(startX), y(startY), velocityX(directionX * 10.0f), velocityY(directionY * 10.0f), active(true), isBuffBullet(false) {
     texture = TextureManager::LoadTexture(texturePath);
     if (!texture) {
         std::cerr << "Failed to load bullet texture!" << std::endl;
@@ -86,12 +86,20 @@ void Bullet::update() {
             if (tileRow >= 0 && tileRow < mapHeight && tileCol >= 0 && tileCol < mapWidth) {
                 int tileType = map[tileRow][tileCol];
 
-                if (tileType == 1) { // Indestructible wall
-                    collisionDetected = true;
-                    std::cout << "  Bullet Corner Collision with Indestructible Wall! Deactivating bullet." << std::endl;
-                    break; // No need to check other corners, collision found
-                }
-                else if (tileType == 2) { // Destructible Wall (3 hits)
+                if (tileType == 1 || tileType == 2 || tileType == 3 || tileType == 4) { // Va ch?m v?i b?t k? t??ng nào
+                    if (isBuffBullet) {
+                        std::cout << "Buff Bullet Collision at (" << tileRow << ", " << tileCol << ")\n";
+                        Game::destroy3x3Walls(tileCol, tileRow); // Trigger 3x3 area destruction
+                        collisionDetected = true; // Deactivate bullet after explosion
+                    }
+                    else {
+
+                        if (tileType == 1) { // Indestructible wall
+                            collisionDetected = true;
+                            std::cout << "  Bullet Corner Collision with Indestructible Wall! Deactivating bullet." << std::endl;
+                            break; // No need to check other corners, collision found
+                        }
+                        else if (tileType == 2) { // Destructible Wall (3 hits)
                             map[tileRow][tileCol] = 3; // Change to 1-hit remaining wall (type 3)
                             collisionDetected = true;
                             std::cout << "  Bullet Corner Collision with Destructible Wall (3 hits -> 2 hit)! Deactivating bullet." << std::endl;
@@ -111,6 +119,8 @@ void Bullet::update() {
                         }
                     }
                 }
+            }
+        }
 
         if (collisionDetected) {
             active = false; // Deactivate bullet if any corner collided

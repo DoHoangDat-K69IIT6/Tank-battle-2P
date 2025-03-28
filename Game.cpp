@@ -5,7 +5,8 @@
 #include "TextureManager.h"
 #include <fstream>
 #include "Bullet.h"
-
+#include <cstdlib> // Cho rand() và srand()
+#include <ctime>   // Cho time()
 
 using namespace std;
 
@@ -55,6 +56,8 @@ Game::~Game() {
 }
 
 bool Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen) {
+    srand(static_cast<unsigned int>(time(0))); // Seed the random number generator with the current time
+
     int flags = 0;
     if (fullscreen) {
         flags = SDL_WINDOW_FULLSCREEN;
@@ -167,6 +170,12 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false; // Or handle the error appropriately
     }
 
+    bombTexture = TextureManager::LoadTexture("assets/bomb.png"); // Replace with your actual filename
+    if (!bombTexture) {
+        std::cerr << "Failed to load bomb texture!" << std::endl;
+        return false; // Or handle the error appropriately
+    }
+
     // khoi tao map
     //loadMap("assets/map.txt");
 
@@ -230,44 +239,26 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     cout << "Background Music Loaded!..." << std::endl;
     // --- End Load Background Music ---
     
+    buffSound = Mix_LoadWAV("assets/sound/buff_powerup.wav");   // Replace "assets/win_sound.wav" with your actual file path
+    if (!buffSound) {
+        std::cerr << "Failed to load win sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        return false;
+    }
    
     // ... load other sound effects if needed ...
     cout << "Sound Effects Loaded!..." << std::endl;
     // --- End Load Sound Effects ---
 
+    lastBuffSpawnTime = SDL_GetTicks(); // Initialize last spawn time to current time at game start
+    buffSpawnInterval = 10000;         // 10 seconds in milliseconds
+    buffDuration = 5000;             // 5 seconds buff duration
+    isBuffActive = false;             // No buff active initially
+    currentBuffType = 0;              // No buff type initially
+    currentBuffLocation = { -1, -1 };    // Initialize to invalid location
+
     return true;
 }
 
-//void Game::handleEvents() {
-//    SDL_Event event;
-//    while (SDL_PollEvent(&event)) {
-//        switch (event.type) {
-//        case SDL_QUIT:
-//            isRunning = false;
-//            break;
-//        case SDL_KEYDOWN: // Just call handlePlayingEvents for KEYDOWN in PLAYING state
-//        case SDL_KEYUP:
-//            if (gameState == PLAYING) {
-//                handlePlayingEvents(event); // Pass event to playing event handler
-//            }
-//            else if (gameState == MENU) {
-//                handleMenuEvents(event);   // Pass event to menu event handler
-//            }
-//            break;
-//        case SDL_MOUSEBUTTONDOWN: // For menu clicks (only handled in MENU state)
-//            if (gameState == MENU) {
-//                handleMenuEvents(event);
-//            } else if (gameState == CREDITS) { // <--- NEW: Handle mouse click in CREDITS
-//				setGameState(MENU); // Return to menu
-//            } else if (gameState == GAME_OVER) { // <--- NEW: Handle mouse click in GAME_OVER
-//                resetGame(); // Reset game and return to menu
-//            }
-//            break;
-//        default:
-//            break;
-//        }
-//    }
-//}
 
 void Game::handleEvents() {
     SDL_Event event;
@@ -303,7 +294,42 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
-    // Update game logic here (e.g., player movement, enemy AI).  For now, empty.
+    // Kiểm tra nhặt buff cho Player 1
+    int p1CenterX = player1->getRect().x + player1->getRect().w / 2;
+    int p1CenterY = player1->getRect().y + player1->getRect().h / 2;
+    int p1TileCol = p1CenterX / TILE_SIZE;
+    int p1TileRow = p1CenterY / TILE_SIZE;
+    if (p1TileRow >= 0 && p1TileRow < mapHeight && p1TileCol >= 0 && p1TileCol < mapWidth) {
+        if (map[p1TileRow][p1TileCol] == 7 && !player1->hasBuff) {
+            player1->hasBuff = true;
+            map[p1TileRow][p1TileCol] = 0; // Xóa buff khỏi map
+
+            isBuffActive = false; 
+            currentBuffLocation = { -1, -1 };
+            currentBuffType = 0;             
+            cout << "Player 1 picked up the 3x3 buff!" << endl;
+            Mix_PlayChannel(-1, buffSound, 0); // (Tùy chọn) Phát âm thanh khi nhặt buff
+        }
+    }
+
+    // Kiểm tra nhặt buff cho Player 2
+    int p2CenterX = player2->getRect().x + player2->getRect().w / 2;
+    int p2CenterY = player2->getRect().y + player2->getRect().h / 2;
+    int p2TileCol = p2CenterX / TILE_SIZE;
+    int p2TileRow = p2CenterY / TILE_SIZE;
+    if (p2TileRow >= 0 && p2TileRow < mapHeight && p2TileCol >= 0 && p2TileCol < mapWidth) {
+        if (map[p2TileRow][p2TileCol] == 7 && !player2->hasBuff) {
+            player2->hasBuff = true;
+            map[p2TileRow][p2TileCol] = 0; // Xóa buff khỏi map
+
+            isBuffActive = false; 
+            currentBuffLocation = { -1, -1 }; 
+            currentBuffType = 0;              
+            cout << "Player 2 picked up the 3x3 buff!" << endl;
+            Mix_PlayChannel(-1, buffSound, 0); // (Tùy chọn) Phát âm thanh khi nhặt buff
+        }
+    }
+
 
     for (int i = 0; i < bullets.size(); ++i) {
         if (bullets[i]->isActive()) {
@@ -413,6 +439,54 @@ void Game::update() {
         }
         if (keyboardState[SDL_SCANCODE_RIGHT]) {
             player2->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);
+        }
+    }
+
+    // --- Buff Spawning Logic ---
+    Uint32 currentTime = SDL_GetTicks();
+
+    if (!isBuffActive) {
+        if (currentTime - lastBuffSpawnTime >= buffSpawnInterval) {
+            lastBuffSpawnTime = currentTime;
+
+
+            int spawnTileRow, spawnTileCol;
+            bool foundSpawnPoint = false;
+            int maxAttempts = 100;
+
+            for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+                spawnTileRow = rand() % mapHeight;
+                spawnTileCol = rand() % mapWidth;
+
+                if (map[spawnTileRow][spawnTileCol] == 0) {
+                    foundSpawnPoint = true;
+                    break;
+                }
+            }
+
+            if (foundSpawnPoint) {
+                map[spawnTileRow][spawnTileCol] = 7;
+                currentBuffLocation = { spawnTileCol, spawnTileRow };
+                currentBuffSpawnTime = currentTime;
+                isBuffActive = true;
+                std::cout << "Spawned buff type " << currentBuffType << " at (" << spawnTileRow << ", " << spawnTileCol << ")" << std::endl;
+            }
+            else {
+                std::cout << "Failed to find empty tile to spawn buff after " << maxAttempts << " attempts." << std::endl;
+            }
+        }
+    }
+    else {
+        if (currentTime - currentBuffSpawnTime >= buffDuration) {
+            if (currentBuffLocation.x != -1 && currentBuffLocation.y != -1) {
+                if (map[currentBuffLocation.y][currentBuffLocation.x] == 7) {
+                    map[currentBuffLocation.y][currentBuffLocation.x] = 0;
+                    std::cout << "Buff type " << currentBuffType << " at (" << currentBuffLocation.y << ", " << currentBuffLocation.x << ") disappeared." << std::endl;
+                }
+            }
+            isBuffActive = false;
+            currentBuffLocation = { -1, -1 };
+
         }
     }
 }
@@ -638,106 +712,6 @@ void Game::clean() {
 }
 
 
-//void Game::handlePlayingEvents(const SDL_Event& event) {
-//    const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-//
-//	if (keyboardState[SDL_SCANCODE_ESCAPE]) {
-//		setGameState(MENU);
-//	}
-//
-//    // Player 1 Movement (WASD) - Pass player2 as the otherPlayer
-//    if (keyboardState[SDL_SCANCODE_W]) {
-//        player1->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
-//    }
-//    if (keyboardState[SDL_SCANCODE_S]) {
-//        player1->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
-//    }
-//    if (keyboardState[SDL_SCANCODE_A]) {
-//        player1->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2); // Pass player2
-//    }
-//    if (keyboardState[SDL_SCANCODE_D]) {
-//        player1->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player2);  // Pass player2
-//    }
-//
-//
-//    // Player 2 Movement (Arrow Keys) - Pass player1 as the otherPlayer
-//    if (keyboardState[SDL_SCANCODE_UP]) {
-//        player2->move(0, -1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
-//    }
-//    if (keyboardState[SDL_SCANCODE_DOWN]) {
-//        player2->move(0, 1, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1);  // Pass player1
-//    }
-//    if (keyboardState[SDL_SCANCODE_LEFT]) {
-//        player2->move(-1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
-//    }
-//    if (keyboardState[SDL_SCANCODE_RIGHT]) {
-//        player2->move(1, 0, mapWidth * TILE_SIZE, mapHeight * TILE_SIZE, map, player1); // Pass player1
-//    }
-//
-//    if (keyboardState[SDL_SCANCODE_SPACE]) { // Player 1 shoots with SPACE
-//        Uint32 currentTime = SDL_GetTicks();
-//        if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) { // Fire rate check
-//
-//            player1->setLastShotTime(currentTime); // Update last shot time
-//
-//            FacingDirection p1Facing = player1->getFacingDirection();
-//            int bulletDirX = 0;
-//            int bulletDirY = 0;
-//            int spawnOffsetX = 0;
-//            int spawnOffsetY = 0;
-//
-//			switch (p1Facing) {
-//                case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
-//                case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
-//                case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
-//                case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
-//            }
-//
-//            Bullet* bullet = new Bullet(
-//                player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
-//                player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
-//                bulletDirX, bulletDirY,
-//                "assets/bullet_spritesheet.png"
-//            );
-//            bullets.push_back(bullet);
-//
-//			// --- Play Fire Sound Effect ---
-//			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
-//        }
-//    }
-//    if (keyboardState[SDL_SCANCODE_SLASH]) { // Player 2 shoots with '/' (slash key)
-//        Uint32 currentTime = SDL_GetTicks();
-//        if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) { // Fire rate check
-//
-//            player2->setLastShotTime(currentTime); // Update last shot time
-//
-//            FacingDirection p2Facing = player2->getFacingDirection();
-//            int bulletDirX = 0;
-//            int bulletDirY = 0;
-//            int spawnOffsetX = 0;
-//            int spawnOffsetY = 0;
-//
-//            switch (p2Facing) {
-//            case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
-//            case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
-//            case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
-//            case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
-//            }
-//
-//            Bullet* bullet = new Bullet(
-//                player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
-//                player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
-//                bulletDirX, bulletDirY,
-//                "assets/bullet_spritesheet.png"
-//            );
-//            bullets.push_back(bullet);
-//
-//			// --- Play Fire Sound Effect ---
-//			Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
-//        }
-//    }
-//}
-
 void Game::handlePlayingEvents(const SDL_Event& event) {
     if (event.type == SDL_KEYDOWN) {
         if (event.key.keysym.sym == SDLK_SPACE) { // Player 1 shoots with SPACE
@@ -788,6 +762,60 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 );
                 bullets.push_back(bullet);
                 Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
+            }
+        }
+        else if (event.key.keysym.sym == SDLK_e && player1->hasBuff) { // Player 1 bắn đạn buff
+            player1->hasBuff = false; // Dùng buff một lần rồi mất
+            Uint32 currentTime = SDL_GetTicks();
+            if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) {
+                player1->setLastShotTime(currentTime);
+                FacingDirection p1Facing = player1->getFacingDirection();
+                int bulletDirX = 0;
+                int bulletDirY = 0;
+                int spawnOffsetX = 0;
+                int spawnOffsetY = 0;
+                switch (p1Facing) {
+                case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+                case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+                case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+                case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+                }
+                Bullet* bullet = new Bullet(
+                    player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
+                    player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
+                    bulletDirX, bulletDirY,
+                    "assets/bomb.png" // (Tùy chọn) Dùng texture khác cho đạn buff
+                );
+                bullet->isBuffBullet = true; // Đánh dấu là đạn buff
+                bullets.push_back(bullet);
+                Mix_PlayChannel(-1, fireSound, 0);
+            }
+        }
+        else if (event.key.keysym.sym == SDLK_m && player2->hasBuff) { // Player 2 bắn đạn buff
+            player2->hasBuff = false; // Dùng buff một lần rồi mất
+            Uint32 currentTime = SDL_GetTicks();
+            if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) {
+                player2->setLastShotTime(currentTime);
+                FacingDirection p2Facing = player2->getFacingDirection();
+                int bulletDirX = 0;
+                int bulletDirY = 0;
+                int spawnOffsetX = 0;
+                int spawnOffsetY = 0;
+                switch (p2Facing) {
+                case UP:    bulletDirY = -1; spawnOffsetY = -30; break;
+                case DOWN:  bulletDirY = 1;  spawnOffsetY = 30;  break;
+                case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
+                case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
+                }
+                Bullet* bullet = new Bullet(
+                    player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
+                    player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
+                    bulletDirX, bulletDirY,
+                    "assets/bomb.png" // (Tùy chọn) Dùng texture khác
+                );
+                bullet->isBuffBullet = true; // Đánh dấu là đạn buff
+                bullets.push_back(bullet);
+                Mix_PlayChannel(-1, fireSound, 0);
             }
         }
         else if (event.key.keysym.sym == SDLK_ESCAPE) {
@@ -1014,4 +1042,18 @@ void Game::renderCredits() {
     SDL_RenderCopy(renderer, lhpTexture, NULL, &lhpRect);
     SDL_FreeSurface(lhpSurface);
     SDL_DestroyTexture(lhpTexture);
+}
+
+void Game::destroy3x3Walls(int tileCol, int tileRow) {
+    for (int r = tileRow - 1; r <= tileRow + 1; r++) { // Iterate over 3 rows
+        for (int c = tileCol - 1; c <= tileCol + 1; c++) { // Iterate over 3 columns
+            if (r >= 0 && r < mapHeight && c >= 0 && c < mapWidth) { // Check map boundaries
+                int tileType = map[r][c];
+                if (tileType == 2 || tileType == 3 || tileType == 4) { // Only affect destructible walls (types 2, 3, 4)
+                    std::cout << "Destroying wall at (" << r << ", " << c << ")\n";
+                    map[r][c] = 4; // Set to 0 to destroy the wall (empty space)
+                }
+            }
+        }
+    }
 }

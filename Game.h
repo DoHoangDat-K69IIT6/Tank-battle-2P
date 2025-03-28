@@ -59,6 +59,8 @@ public:
 
     TTF_Font* titlefont;
 
+    static void destroy3x3Walls(int tileCol, int tileRow); // Thêm hàm phá t??ng 3x3
+
 private:
     SDL_Window* window;
     bool isRunning;
@@ -88,6 +90,8 @@ private:
     SDL_Texture* wall2Texture; // Texture for walls that can be destroyed (2 hits)
     SDL_Texture* wall2Texture_damaged1;
     SDL_Texture* wall2Texture_damaged2;
+
+    SDL_Texture* bombTexture;
 
     SDL_Texture* targetP1Texture; // Texture for target 1
     SDL_Texture* targetP2Texture; // Texture for target 2
@@ -126,5 +130,15 @@ private:
     Mix_Chunk* fireSound;   // For player shooting sound
     Mix_Chunk* hitSound;    // For player hit sound
     Mix_Chunk* winSound;    // For win sound effect
+    Mix_Chunk* buffSound;    // For win sound effect
+
+    Uint32 lastBuffSpawnTime;     // Time of the last buff spawn
+    Uint32 buffSpawnInterval; // Interval between buff spawns (10 seconds)
+    Uint32 currentBuffSpawnTime;    // Time when the current buff spawned
+    Uint32 buffDuration;      // Duration for which the buff stays on the map (e.g., 5 seconds)
+    SDL_Point currentBuffLocation;  // Location of the currently spawned buff (tile coordinates)
+    bool isBuffActive;              // Flag to track if a buff is currently active on the map
+    int currentBuffType;            // Stores the type of the current buff (7 or 9)
+
 };
 
