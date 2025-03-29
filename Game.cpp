@@ -7,13 +7,12 @@
 #include "Bullet.h"
 #include <cstdlib> // Cho rand() và srand()
 #include <ctime>   // Cho time()
+#include <string>
 
 using namespace std;
 
-
 SDL_Renderer* Game::renderer = nullptr;
-
-std::vector<std::vector<int>> Game::map;      // Initialize static map
+vector<vector<int>> Game::map;      // Initialize static map
 int Game::mapWidth = 0;                       // Initialize static mapWidth
 int Game::mapHeight = 0;
 
@@ -93,18 +92,18 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false;
     }
 
-    // Load a font (Make sure "assets/arial.ttf" exists in your build directory)
+    // Load font 
     font = TTF_OpenFont("assets/PressStart2P-Regular.ttf", 24);
     titlefont = TTF_OpenFont("assets/PressStart2P-Regular.ttf", 30);
     if (!font || !titlefont) {
-        std::cerr << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << std::endl;
+        cout << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << endl;
         return false;
     }
 
     // Load menu background
     menuBackgroundTexture = TextureManager::LoadTexture("assets/menu_background.jpg");
     if (!menuBackgroundTexture) {
-        std::cerr << "Failed to load menu background texture!" << std::endl;
+        cout << "Failed to load menu background texture!" << endl;
         return false;
     }
 
@@ -117,70 +116,61 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         !highScoreButtonNormalTexture ||
         !creditsButtonNormalTexture)
     {
-        std::cerr << "Failed to load button textures!" << std::endl;
+        cout << "Failed to load button textures!" << endl;
         return false;
     }
 
     // Load wall textures
-    wallTexture = TextureManager::LoadTexture("assets/wall.png"); // Replace with your actual filename
+    wallTexture = TextureManager::LoadTexture("assets/wall.png"); 
     if (!wallTexture) {
-        std::cerr << "Failed to load wall texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load wall texture!" << endl;
+        return false;
     }
 
-    wall2Texture = TextureManager::LoadTexture("assets/wall2.png"); // Replace with your actual filename
+    wall2Texture = TextureManager::LoadTexture("assets/wall2.png"); 
     if (!wall2Texture) {
-        std::cerr << "Failed to load wall2 texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load wall2 texture!" << endl;
+        return false; 
     }
 
-    wall2Texture_damaged1 = TextureManager::LoadTexture("assets/wall2_damaged1.png"); // Replace with your actual filename
+    wall2Texture_damaged1 = TextureManager::LoadTexture("assets/wall2_damaged1.png"); 
     if (!wall2Texture_damaged1) {
-        std::cerr << "Failed to load wall2_damaged1 texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load wall2_damaged1 texture!" << endl;
+        return false; 
     }
 
-    wall2Texture_damaged2 = TextureManager::LoadTexture("assets/wall2_damaged2.png"); // Replace with your actual filename
+    wall2Texture_damaged2 = TextureManager::LoadTexture("assets/wall2_damaged2.png"); 
     if (!wall2Texture_damaged2) {
-        std::cerr << "Failed to load wall2_damaged2 texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load wall2_damaged2 texture!" << endl;
+        return false; 
     }
 
-    targetP1Texture = TextureManager::LoadTexture("assets/targetP1.jpeg"); // Replace with your actual filename
+    targetP1Texture = TextureManager::LoadTexture("assets/targetP1.jpeg"); 
     if (!targetP1Texture) {
-        std::cerr << "Failed to load target 1 texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load target 1 texture!" << endl;
+        return false;
     }
 
-    targetP2Texture = TextureManager::LoadTexture("assets/targetP2.jpeg"); // Replace with your actual filename
+    targetP2Texture = TextureManager::LoadTexture("assets/targetP2.jpeg"); 
     if (!targetP2Texture) {
-        std::cerr << "Failed to load target 2 texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load target 2 texture!" << endl;
+        return false;
     }
 
-    buff3x3Texture = TextureManager::LoadTexture("assets/buff3x3.png"); // Replace with your actual filename
+    buff3x3Texture = TextureManager::LoadTexture("assets/buff3x3.png"); 
     if (!buff3x3Texture) {
-        std::cerr << "Failed to load star3 texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load star3 texture!" << endl;
+        return false; 
     }
 
-    buff5x5Texture = TextureManager::LoadTexture("assets/buff5x5.png"); // Replace with your actual filename
-    if (!buff5x5Texture) {
-        std::cerr << "Failed to load star5 texture!" << std::endl;
-        return false; // Or handle the error appropriately
-    }
-
-    bombTexture = TextureManager::LoadTexture("assets/bomb.png"); // Replace with your actual filename
+    bombTexture = TextureManager::LoadTexture("assets/bomb.png"); 
     if (!bombTexture) {
-        std::cerr << "Failed to load bomb texture!" << std::endl;
-        return false; // Or handle the error appropriately
+        cout << "Failed to load bomb texture!" << endl;
+        return false; 
     }
 
-    // khoi tao map
-    //loadMap("assets/map.txt");
 
     // khoi tao nguoi choi
-
     player1 = new Player(175, 350, "assets/green_tank_spritesheet.png");
     player2 = new Player(1155, 350, "assets/red_tank_spritesheet.png");
 
@@ -188,43 +178,39 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     Game::copyFileContent("assets/scr_map.txt", "assets/map.txt");
     loadMap("assets/map.txt");
 
-    // --- NEW: Hardcode Target TILE Coordinates ---
-    targetP1TileCol = 37; // Replace XX with the actual TILE COLUMN of Target P1 (tile type 8)
-    targetP1TileRow = 10; // Replace YY with the actual TILE ROW of Target P1 (tile type 8)
-    std::cout << "Target P1 Tile Coordinates (Hardcoded): (" << targetP1TileCol << ", " << targetP1TileRow << ")" << std::endl;
+	// Gan vi tri cua target
+    targetP1TileCol = 37; 
+    targetP1TileRow = 10; 
 
-    targetP2TileCol = 1; // Replace AA with the actual TILE COLUMN of Target P2 (tile type 5)
-    targetP2TileRow = 10; // Replace BB with the actual TILE ROW of Target P2 (tile type 5)
-    std::cout << "Target P2 Tile Coordinates (Hardcoded): (" << targetP2TileCol << ", " << targetP2TileRow << ")" << std::endl;
-    // --- End Hardcoded Target Tile Coordinates ---
+    targetP2TileCol = 1; 
+    targetP2TileRow = 10;
 
     // --- Initialize SDL_mixer ---
-    if (Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG) == 0) { // Initialize support for MP3 and OGG (common formats)
-        std::cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << std::endl;
-        return false; // Return false to indicate initialization failure
-    }
-
-    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { // Open audio device
-        std::cerr << "SDL_mixer could not open audio! SDL_mixer Error: " << Mix_GetError() << std::endl;
-        return false; // Return false if audio opening fails
-    }
-    cout << "SDL_mixer Initialized!..." << endl;
-    // --- End SDL_mixer Initialization ---
-
-    // --- Load Sound Effects ---
-    fireSound = Mix_LoadWAV("assets/sound/fire_sound.wav"); // Replace "assets/fire_sound.wav" with your actual file path
-    if (!fireSound) {
-        std::cerr << "Failed to load fire sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
+    if (Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG) == 0) { 
+        cout << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;
         return false;
     }
 
-    hitSound = Mix_LoadWAV("assets/sound/hit_sound.wav");   // Replace "assets/hit_sound.wav" with your actual file path
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { 
+        cout << "SDL_mixer could not open audio! SDL_mixer Error: " << Mix_GetError() << endl;
+        return false; 
+    }
+    cout << "SDL_mixer Initialized!..." << endl;
+
+    // --- Load Sound Effects ---
+    fireSound = Mix_LoadWAV("assets/sound/fire_sound.wav"); 
+    if (!fireSound) {
+        cout << "Failed to load fire sound effect! SDL_mixer Error: " << Mix_GetError() << endl;
+        return false;
+    }
+
+    hitSound = Mix_LoadWAV("assets/sound/hit_sound.wav");  
     if (!hitSound) {
         std::cerr << "Failed to load hit sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
         return false;
     }
 
-    winSound = Mix_LoadWAV("assets/sound/win_sound.wav");   // Replace "assets/win_sound.wav" with your actual file path
+    winSound = Mix_LoadWAV("assets/sound/win_sound.wav");   
     if (!winSound) {
         std::cerr << "Failed to load win sound effect! SDL_mixer Error: " << Mix_GetError() << std::endl;
         return false;
@@ -233,11 +219,11 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     // --- Load Background Music ---
     music = Mix_LoadMUS("assets/sound/music.wav"); // Replace "assets/music.wav" with your actual music file path
     if (!music) {
-        std::cerr << "Failed to load background music! SDL_mixer Error: " << Mix_GetError() << std::endl;
+        cout << "Failed to load background music! SDL_mixer Error: " << Mix_GetError() << endl;
         return false;
     }
     cout << "Background Music Loaded!..." << std::endl;
-    // --- End Load Background Music ---
+
     
     buffSound = Mix_LoadWAV("assets/sound/buff_powerup.wav");   // Replace "assets/win_sound.wav" with your actual file path
     if (!buffSound) {
@@ -245,15 +231,13 @@ bool Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         return false;
     }
    
-    // ... load other sound effects if needed ...
     cout << "Sound Effects Loaded!..." << std::endl;
-    // --- End Load Sound Effects ---
 
+    // Cai dat buff time
     lastBuffSpawnTime = SDL_GetTicks(); // Initialize last spawn time to current time at game start
     buffSpawnInterval = 10000;         // 10 seconds in milliseconds
     buffDuration = 5000;             // 5 seconds buff duration
     isBuffActive = false;             // No buff active initially
-    currentBuffType = 0;              // No buff type initially
     currentBuffLocation = { -1, -1 };    // Initialize to invalid location
 
     return true;
@@ -267,13 +251,13 @@ void Game::handleEvents() {
         case SDL_QUIT:
             isRunning = false;
             break;
-        case SDL_KEYDOWN: // Just call handlePlayingEvents for KEYDOWN in PLAYING state
+        case SDL_KEYDOWN: 
         case SDL_KEYUP:
             if (gameState == PLAYING) {
-                handlePlayingEvents(event); // Pass event to playing event handler
+                handlePlayingEvents(event); 
             }
             else if (gameState == MENU) {
-                handleMenuEvents(event);   // Pass event to menu event handler
+                handleMenuEvents(event);   
             }
             break;
         case SDL_MOUSEBUTTONDOWN:
@@ -281,10 +265,10 @@ void Game::handleEvents() {
                 handleMenuEvents(event);
             }
             else if (gameState == CREDITS) {
-                setGameState(MENU); // Return to menu
+                setGameState(MENU); 
             }
             else if (gameState == GAME_OVER) {
-                resetGame(); // Reset game and return to menu
+                resetGame();
             }
             break;
         default:
@@ -294,7 +278,7 @@ void Game::handleEvents() {
 }
 
 void Game::update() {
-    // Kiểm tra nhặt buff cho Player 1
+	// Kiem tra neu nguoi choi co buff thi cap nhat buff
     int p1CenterX = player1->getRect().x + player1->getRect().w / 2;
     int p1CenterY = player1->getRect().y + player1->getRect().h / 2;
     int p1TileCol = p1CenterX / TILE_SIZE;
@@ -302,17 +286,16 @@ void Game::update() {
     if (p1TileRow >= 0 && p1TileRow < mapHeight && p1TileCol >= 0 && p1TileCol < mapWidth) {
         if (map[p1TileRow][p1TileCol] == 7 && !player1->hasBuff) {
             player1->hasBuff = true;
-            map[p1TileRow][p1TileCol] = 0; // Xóa buff khỏi map
+			map[p1TileRow][p1TileCol] = 0; // Xoa buff khoi map
 
             isBuffActive = false; 
-            currentBuffLocation = { -1, -1 };
-            currentBuffType = 0;             
+            currentBuffLocation = { -1, -1 };             
             cout << "Player 1 picked up the 3x3 buff!" << endl;
-            Mix_PlayChannel(-1, buffSound, 0); // (Tùy chọn) Phát âm thanh khi nhặt buff
+            Mix_PlayChannel(-1, buffSound, 0); 
         }
     }
 
-    // Kiểm tra nhặt buff cho Player 2
+	// Kiem tra neu nguoi choi co buff thi cap nhat buff
     int p2CenterX = player2->getRect().x + player2->getRect().w / 2;
     int p2CenterY = player2->getRect().y + player2->getRect().h / 2;
     int p2TileCol = p2CenterX / TILE_SIZE;
@@ -320,13 +303,12 @@ void Game::update() {
     if (p2TileRow >= 0 && p2TileRow < mapHeight && p2TileCol >= 0 && p2TileCol < mapWidth) {
         if (map[p2TileRow][p2TileCol] == 7 && !player2->hasBuff) {
             player2->hasBuff = true;
-            map[p2TileRow][p2TileCol] = 0; // Xóa buff khỏi map
+			map[p2TileRow][p2TileCol] = 0; // Xoa buff khoi map
 
             isBuffActive = false; 
-            currentBuffLocation = { -1, -1 }; 
-            currentBuffType = 0;              
+            currentBuffLocation = { -1, -1 };            
             cout << "Player 2 picked up the 3x3 buff!" << endl;
-            Mix_PlayChannel(-1, buffSound, 0); // (Tùy chọn) Phát âm thanh khi nhặt buff
+            Mix_PlayChannel(-1, buffSound, 0); 
         }
     }
 
@@ -349,7 +331,7 @@ void Game::update() {
             {
                 bullets[i]->deactivate(); // Deactivate bullet
                 Mix_PlayChannel(-1, hitSound, 0); // Play hit sound
-                player1->respawn();      // Player 1 respawns (you can change this to health decrease etc.)
+                player1->respawn();      // Player 1 respawns
                 cout << "Player 1 hit!" << endl;
             }
             // Bullet vs Player 2
@@ -364,7 +346,6 @@ void Game::update() {
                 player2->respawn();      // Player 2 respawns
                 cout << "Player 2 hit!" << endl;
             }
-            // --- End Bullet-Player Collision Detection ---
 
         }
         else {
@@ -375,40 +356,39 @@ void Game::update() {
         }
     }
 
-    // --- NEW: Win condition check based on TILE coordinates ---
-    if (Game::gameState == PLAYING) { // Only check win condition if game is PLAYING
+    // --- Win condition check based on TILE coordinates ---
+    if (Game::gameState == PLAYING) { 
         int p1TileCol = player1->getRect().x / TILE_SIZE; // Player 1 tile column 
         int p1TileRow = player1->getRect().y / TILE_SIZE; // Player 1 tile row
-		/*cout << "Player 1 Tile Coordinates: (" << p1TileCol << ", " << p1TileRow << ")" << endl;
-		cout << "Player 1 Tile destination (" << targetP1TileCol << ", " << targetP1TileRow << ")" << endl;*/
 
         int p2TileCol = player2->getRect().x / TILE_SIZE; // Player 2 tile column
         int p2TileRow = player2->getRect().y / TILE_SIZE; // Player 2 tile row
-		/*cout << "Player 2 Tile Coordinates: (" << p2TileCol << ", " << p2TileRow << ")" << endl;
-		cout << "Player 2 Tile destination (" << targetP2TileCol << ", " << targetP2TileRow << ")" << endl;*/
 
         if (p1TileCol == targetP1TileCol && p1TileRow == targetP1TileRow) {
-            std::cout << "Player 1 Wins! (Tile Coordinates Match)" << std::endl;
+            cout << "Player 1 Wins! (Tile Coordinates Match)" << endl;
             Mix_PlayChannel(-1, winSound, 0); // Play win sound
             Game::setGameState(GAME_OVER);
             Game::setWinner(1);
         }
         else if (p2TileCol == targetP2TileCol && p2TileRow == targetP2TileRow) {
-            std::cout << "Player 2 Wins! (Tile Coordinates Match)" << std::endl;
-			Mix_PlayChannel(-1, winSound, 0); // Play win sound
+            cout << "Player 2 Wins! (Tile Coordinates Match)" << endl;
+			Mix_PlayChannel(-1, winSound, 0);
             Game::setGameState(GAME_OVER);
             Game::setWinner(2);
         }
     }
-    // --- End Win Condition Check ---
 
     // --- Start Background Music (if not already playing and in PLAYING state) ---
     if (gameState == PLAYING && Mix_PlayingMusic() == 0) { // Check game state and if music is NOT already playing
         if (Mix_PlayMusic(music, -1) == -1) { // Start playing music, loop infinitely (-1)
-            std::cerr << "Failed to play background music! SDL_mixer Error: " << Mix_GetError() << std::endl;
+            cout << "Failed to play background music! SDL_mixer Error: " << Mix_GetError() << endl;
         }
     }
-    // --- End Background Music Start ---
+
+	// Dung nhac khi game over
+	if (gameState == GAME_OVER && Mix_PlayingMusic() == 1) { // Check game state and if music is playing
+		Mix_HaltMusic(); // Stop playing music
+	}
 
     if (gameState == PLAYING) {
         const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
@@ -469,7 +449,7 @@ void Game::update() {
                 currentBuffLocation = { spawnTileCol, spawnTileRow };
                 currentBuffSpawnTime = currentTime;
                 isBuffActive = true;
-                std::cout << "Spawned buff type " << currentBuffType << " at (" << spawnTileRow << ", " << spawnTileCol << ")" << std::endl;
+                std::cout << "Spawned buff at (" << spawnTileRow << ", " << spawnTileCol << ")" << std::endl;
             }
             else {
                 std::cout << "Failed to find empty tile to spawn buff after " << maxAttempts << " attempts." << std::endl;
@@ -481,7 +461,7 @@ void Game::update() {
             if (currentBuffLocation.x != -1 && currentBuffLocation.y != -1) {
                 if (map[currentBuffLocation.y][currentBuffLocation.x] == 7) {
                     map[currentBuffLocation.y][currentBuffLocation.x] = 0;
-                    std::cout << "Buff type " << currentBuffType << " at (" << currentBuffLocation.y << ", " << currentBuffLocation.x << ") disappeared." << std::endl;
+                    cout << "Buff at (" << currentBuffLocation.y << ", " << currentBuffLocation.x << ") disappeared." << endl;
                 }
             }
             isBuffActive = false;
@@ -507,7 +487,7 @@ void Game::render() {
             bullet->render(); //The bullet check if it is active.
         }
         break;
-    case GAME_OVER: // <--- NEW: Render Game Over screen
+    case GAME_OVER: 
         renderGameOver();
         break;
     case CREDITS:
@@ -613,26 +593,25 @@ void Game::handleMenuEvents(const SDL_Event& event) {
         int mouseX = event.button.x;
         int mouseY = event.button.y;
 
-        std::cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << std::endl;
+        cout << "Mouse click at: (" << mouseX << ", " << mouseY << ")" << endl;
 
-        // ... (rest of your mouse button down logic) ...
         //Check if PLAY button was clicked
         if (mouseX >= playButtonRect.x && mouseX <= playButtonRect.x + playButtonRect.w &&
             mouseY >= playButtonRect.y && mouseY <= playButtonRect.y + playButtonRect.h) {
             gameState = PLAYING;
-            std::cout << "PLAY button clicked!\n";
+            cout << "PLAY button clicked!\n";
         }
         // Check if CREDIT button was clicked
         else if (mouseX >= highScoreButtonRect.x && mouseX <= highScoreButtonRect.x + highScoreButtonRect.w &&
             mouseY >= highScoreButtonRect.y && mouseY <= highScoreButtonRect.y + highScoreButtonRect.h) {
             gameState = CREDITS;
-            std::cout << "CREDITS button clicked!\n";
+            cout << "CREDITS button clicked!\n";
         }
         // Check if CREDITS button was clicked
         else if (mouseX >= creditsButtonRect.x && mouseX <= creditsButtonRect.x + creditsButtonRect.w &&
             mouseY >= creditsButtonRect.y && mouseY <= creditsButtonRect.y + creditsButtonRect.h) {
             gameState = QUIT;
-            std::cout << "QUIT button clicked!\n";
+            cout << "QUIT button clicked!\n";
 			isRunning = false;
         }
         break;
@@ -663,52 +642,46 @@ void Game::clean() {
         creditsButtonNormalTexture = nullptr; 
     }
 
-    // huy ttf
+	// --- SDL_ttf Cleanup ---
     if (font) { // Check if font is loaded before closing and quitting
         TTF_CloseFont(font);
         font = nullptr;
     }
-    if (titlefont) { // Check if font is loaded before closing and quitting
+    if (titlefont) { 
         TTF_CloseFont(titlefont);
         titlefont = nullptr;
     }
     TTF_Quit();
 
-    for (Bullet* bullet : bullets) { // Very, very important to delete allocated bullets!
+    for (Bullet* bullet : bullets) { 
         delete bullet;
     }
     bullets.clear(); // Clear the bullets vector
 
     // --- SDL_mixer Cleanup ---
     if (fireSound) {
-        Mix_FreeChunk(fireSound); // Free the fire sound chunk
+        Mix_FreeChunk(fireSound); 
         fireSound = nullptr;
     }
     if (hitSound) {
-        Mix_FreeChunk(hitSound);  // Free the hit sound chunk
+        Mix_FreeChunk(hitSound);  
         hitSound = nullptr;
     }
     if (winSound) {
-        Mix_FreeChunk(winSound);  // Free the win sound chunk
+        Mix_FreeChunk(winSound); 
         winSound = nullptr;
     }
-
 	if (music) {
-		Mix_FreeMusic(music);     // Free the music
+		Mix_FreeMusic(music);     
 		music = nullptr;
 	}
 
     Mix_CloseAudio(); // Close the audio device
     Mix_Quit();       // Quit SDL_mixer
     cout << "SDL_mixer Cleaned!..." << std::endl;
-    // --- End SDL_mixer Cleanup ---
-
-    TTF_Quit();
-    SDL_Quit();
-    std::cout << "Game Cleaned" << std::endl;
 
     SDL_Quit();
-    std::cout << "Game Cleaned" << std::endl;
+    cout << "Game Cleaned" << std::endl;
 }
 
 
@@ -736,7 +709,7 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                     "assets/bullet_spritesheet.png"
                 );
                 bullets.push_back(bullet);
-                Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
+                Mix_PlayChannel(-1, fireSound, 0); \
             }
         }
         else if (event.key.keysym.sym == SDLK_SLASH) { // Player 2 shoots with '/'
@@ -764,8 +737,8 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 Mix_PlayChannel(-1, fireSound, 0); // Play fire sound effect
             }
         }
-        else if (event.key.keysym.sym == SDLK_e && player1->hasBuff) { // Player 1 bắn đạn buff
-            player1->hasBuff = false; // Dùng buff một lần rồi mất
+        else if (event.key.keysym.sym == SDLK_e && player1->hasBuff) { // Player 1 ban dan buff
+            player1->hasBuff = false; // Dung buff mot lan roi mat
             Uint32 currentTime = SDL_GetTicks();
             if (currentTime - player1->getLastShotTime() >= player1->getFireRate()) {
                 player1->setLastShotTime(currentTime);
@@ -780,19 +753,20 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
                 case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
                 }
+
                 Bullet* bullet = new Bullet(
                     player1->getRect().x + player1->getRect().w / 2 - 8 + spawnOffsetX,
                     player1->getRect().y + player1->getRect().h / 2 - 8 + spawnOffsetY,
                     bulletDirX, bulletDirY,
                     "assets/bomb.png" // (Tùy chọn) Dùng texture khác cho đạn buff
                 );
-                bullet->isBuffBullet = true; // Đánh dấu là đạn buff
+				bullet->isBuffBullet = true; // Danh dau la dan buff
                 bullets.push_back(bullet);
                 Mix_PlayChannel(-1, fireSound, 0);
             }
         }
-        else if (event.key.keysym.sym == SDLK_m && player2->hasBuff) { // Player 2 bắn đạn buff
-            player2->hasBuff = false; // Dùng buff một lần rồi mất
+        else if (event.key.keysym.sym == SDLK_m && player2->hasBuff) { // Player 2 ban dan buff
+			player2->hasBuff = false; // Dung buff mot lan roi mat
             Uint32 currentTime = SDL_GetTicks();
             if (currentTime - player2->getLastShotTime() >= player2->getFireRate()) {
                 player2->setLastShotTime(currentTime);
@@ -807,13 +781,14 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
                 case LEFT:  bulletDirX = -1; spawnOffsetX = -30; break;
                 case RIGHT: bulletDirX = 1;  spawnOffsetX = 30;  break;
                 }
+				// Tao dan buff
                 Bullet* bullet = new Bullet(
                     player2->getRect().x + player2->getRect().w / 2 - 8 + spawnOffsetX,
                     player2->getRect().y + player2->getRect().h / 2 - 8 + spawnOffsetY,
                     bulletDirX, bulletDirY,
-                    "assets/bomb.png" // (Tùy chọn) Dùng texture khác
+                    "assets/bomb.png" 
                 );
-                bullet->isBuffBullet = true; // Đánh dấu là đạn buff
+				bullet->isBuffBullet = true; // Danh dau la dan buff
                 bullets.push_back(bullet);
                 Mix_PlayChannel(-1, fireSound, 0);
             }
@@ -825,37 +800,23 @@ void Game::handlePlayingEvents(const SDL_Event& event) {
 }
 
 bool Game::loadMap(const char* filePath) {
-    std::ifstream mapFile(filePath);
+    ifstream mapFile(filePath);
     if (!mapFile.is_open()) {
-        std::cerr << "Failed to open map file: " << filePath << std::endl;
+        cout << "Failed to open map file: " << filePath << endl;
         return false;
     }
 
     mapFile >> mapWidth >> mapHeight;  // Read width and height
+    map.resize(mapHeight, vector<int>(mapWidth)); // Resize the map vector
 
-    map.resize(mapHeight, std::vector<int>(mapWidth)); // Resize the map vector
-
-    for (int row = 0; row < mapHeight; ++row) {
-        for (int col = 0; col < mapWidth; ++col) {
+    for (int row = 0; row < mapHeight; row++) {
+        for (int col = 0; col < mapWidth; col++) {
             char tileChar;
             mapFile >> tileChar; // Read the tile as a character
             map[row][col] = tileChar - '0'; // Convert character '0', '1', etc., to integer 0, 1, etc.
         }
     }
-
     mapFile.close();
-
-    // --- DEBUGGING: Print Map Data ---
-    std::cout << "Map Width: " << mapWidth << ", Map Height: " << mapHeight << std::endl;
-    std::cout << "Map Data:" << std::endl;
-    for (int row = 0; row < mapHeight; ++row) {
-        for (int col = 0; col < mapWidth; ++col) {
-            std::cout << map[row][col];
-        }
-        std::cout << std::endl;
-    }
-    // --- DEBUGGING END ---
-
     return true;
 }
 
@@ -863,12 +824,6 @@ void Game::renderMap() {
     for (int row = 0; row < mapHeight; ++row) {
         for (int col = 0; col < mapWidth; ++col) {
             int tileType = map[row][col];
-
-            SDL_Rect srcRect; // Source rectangle (within the texture)
-            srcRect.x = 0;    // For now, assume we use the whole texture
-            srcRect.y = 0;
-            srcRect.w = TILE_SIZE;
-            srcRect.h = TILE_SIZE;
 
             SDL_Rect destRect; // Destination rectangle (on the screen)
             destRect.x = col * TILE_SIZE;  // Calculate x position based on column and tile width
@@ -900,34 +855,30 @@ void Game::renderMap() {
             case 7:
                 SDL_RenderCopy(renderer, buff3x3Texture, NULL, &destRect); // Draw target2 texture
                 break;
-            case 9:
-                SDL_RenderCopy(renderer, buff5x5Texture, NULL, &destRect); // Draw target2 texture
-                break;
             }
         }
     }
 }
 
-#include <string>
 
 void Game::copyFileContent(const std::string& sourceFilePath, const std::string& destinationFilePath) {
-    std::ofstream destFileClear(destinationFilePath, std::ios::trunc);
+    ofstream destFileClear(destinationFilePath, ios::trunc);
     destFileClear.close();
 
-    std::ifstream sourceFile(sourceFilePath);
+    ifstream sourceFile(sourceFilePath);
     if (!sourceFile.is_open()) {
-        std::cerr << "Khong the mo tep nguon " << sourceFilePath << std::endl;
+        cout << "Khong the mo tep nguon " << sourceFilePath << endl;
         return;
     }
 
-    std::ofstream destFile(destinationFilePath, std::ios::app);
+    ofstream destFile(destinationFilePath, ios::app);
     if (!destFile.is_open()) {
-        std::cerr << "Khong the mo tep dich " << destinationFilePath << std::endl;
+        cout << "Khong the mo tep dich " << destinationFilePath << endl;
         sourceFile.close(); 
         return;
     }
 
-    std::string line;
+    string line;
     while (std::getline(sourceFile, line)) {
         destFile << line << std::endl;
     }
@@ -935,7 +886,7 @@ void Game::copyFileContent(const std::string& sourceFilePath, const std::string&
     sourceFile.close();
     destFile.close();
 
-    std::cout << "Noi dung cua '" << sourceFilePath << "' da duoc sao chep vao '" << destinationFilePath << "'" << std::endl;
+    cout << "Noi dung cua '" << sourceFilePath << "' da duoc sao chep vao '" << destinationFilePath << "'" << endl;
 }
 
 void Game::renderGameOver() {
@@ -947,15 +898,12 @@ void Game::renderGameOver() {
     SDL_Color menuTextColor = { 200, 200, 200, 255 }; // Grayish for "click to menu"
 
     // Determine win message based on winner
-    std::string winMessage;
+    string winMessage;
     if (Game::getWinner() == 1) {
         winMessage = "Player 1 Wins!";
     }
     else if (Game::getWinner() == 2) {
         winMessage = "Player 2 Wins!";
-    }
-    else {
-        winMessage = "It's a Tie! (How did that happen?)"; // Should not happen in your win condition, but good to have
     }
 
     // 1. Render "Player X Wins!" Text
@@ -993,9 +941,9 @@ void Game::resetGame() {
     bullets.clear();    // Clear all bullets
 
     Game::copyFileContent("assets/scr_map.txt", "assets/map.txt"); // Reload map from source
-    loadMap("assets/map.txt"); // Actually load the map data again
+    loadMap("assets/map.txt"); 
 
-    std::cout << "Game Reset and Back to Menu" << std::endl;
+    cout << "Game Reset and Back to Menu" << endl;
 }
 
 void Game::renderCredits() {
@@ -1049,10 +997,12 @@ void Game::destroy3x3Walls(int tileCol, int tileRow) {
         for (int c = tileCol - 1; c <= tileCol + 1; c++) { // Iterate over 3 columns
             if (r >= 0 && r < mapHeight && c >= 0 && c < mapWidth) { // Check map boundaries
                 int tileType = map[r][c];
-                if (tileType == 2 || tileType == 3 || tileType == 4) { // Only affect destructible walls (types 2, 3, 4)
-                    std::cout << "Destroying wall at (" << r << ", " << c << ")\n";
+                if (tileType == 2 || tileType == 3) { // Only affect destructible walls (types 2, 3, 4)
                     map[r][c] = 4; // Set to 0 to destroy the wall (empty space)
-                }
+				}
+				else if (tileType == 4) { // Player 2 target
+					map[r][c] = 0;
+				}
             }
         }
     }

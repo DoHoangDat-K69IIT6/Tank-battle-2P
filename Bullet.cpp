@@ -6,9 +6,9 @@
 
 using namespace std;
 
-const int Bullet::SPRITE_WIDTH = 16;   // <--- Make sure these are present and correct
-const int Bullet::SPRITE_HEIGHT = 16;  // <--- Make sure these are present and correct
-const int Bullet::SPRITES_PER_ROW = 4; // <--- **ADD THIS MISSING DEFINITION!**
+const int Bullet::SPRITE_WIDTH = 16;   
+const int Bullet::SPRITE_HEIGHT = 16;  
+const int Bullet::SPRITES_PER_ROW = 4; 
 
 Bullet::Bullet(int startX, int startY, int directionX, int directionY, const char* texturePath)
     : x(startX), y(startY), velocityX(directionX * 10.0f), velocityY(directionY * 10.0f), active(true), isBuffBullet(false) {
@@ -18,19 +18,15 @@ Bullet::Bullet(int startX, int startY, int directionX, int directionY, const cha
     }
     rect.x = x;
     rect.y = y;
-    rect.w = Bullet::SPRITE_WIDTH; // Use Bullet::SPRITE_WIDTH
-    rect.h = Bullet::SPRITE_HEIGHT; // Use Bullet::SPRITE_HEIGHT
+    rect.w = Bullet::SPRITE_WIDTH; 
+    rect.h = Bullet::SPRITE_HEIGHT;
 
-    // Initialize source rectangle to select the FIRST sprite (e.g., for UP direction, or a default sprite)
     srcRect.x = 0;
     srcRect.y = 0;
-    srcRect.w = Bullet::SPRITE_WIDTH; // Use Bullet::SPRITE_WIDTH
-    srcRect.h = Bullet::SPRITE_HEIGHT; // Use Bullet::SPRITE_HEIGHT
+    srcRect.w = Bullet::SPRITE_WIDTH; 
+    srcRect.h = Bullet::SPRITE_HEIGHT; 
 
-
-    // --- REMOVE the global FacingDirection and make it a local variable (if needed temporarily) ---
-    // FacingDirection facingDirection;  <--- REMOVE THIS GLOBAL LINE!
-    FacingDirection localFacingDirection = LEFT; // Use a local variable here if you need to determine direction
+    FacingDirection localFacingDirection = LEFT; 
 
     if (directionX < 0) localFacingDirection = LEFT;
     else if (directionX > 0) localFacingDirection = RIGHT;

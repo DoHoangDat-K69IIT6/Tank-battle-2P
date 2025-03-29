@@ -13,39 +13,38 @@ enum FacingDirection {
 
 class Player {
 public:
-    Player(int x, int y, const char* texturePath); // Constructor
-    ~Player();                                    // Destructor
+    Player(int x, int y, const char* texturePath); 
+    ~Player();                                    
 
-    void update(int mapWidth, int mapHeight, vector<vector<int>> map); // Update logic (currently empty)
-    void render();                                    // Render the player
-    void move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer);     // Move the player
+    void update(int mapWidth, int mapHeight, vector<vector<int>> map); 
+    void render();                                   
+    void move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer);     
     void respawn();
 
     void shoot(vector<Bullet*>& bullets, SDL_Texture* bulletTexture);
 
-    SDL_Rect getRect() const { return rect; }          // Get the player's rectangle (for collision later)
+    SDL_Rect getRect() const { return rect; }          
 
     FacingDirection getFacingDirection() const { return facingDirection; }
 
-    Uint32 getLastShotTime() const { return lastShotTime; } // Getter for lastShotTime
-    void setLastShotTime(Uint32 time) { lastShotTime = time; } // Setter for lastShotTime
-    Uint32 getFireRate() const { return fireRate; }       // Getter for fireRate (read-only)
+    Uint32 getLastShotTime() const { return lastShotTime; } 
+    void setLastShotTime(Uint32 time) { lastShotTime = time; }
+    Uint32 getFireRate() const { return fireRate; }       
 
-    bool hasBuff; // Thêm bi?n ?? ki?m tra xem ng??i ch?i có buff hay không
+    bool hasBuff; 
 private:
     FacingDirection facingDirection;
 
     int startX;
     int startY;
-    int x;             // X coordinate in tile units
-    int y;             // Y coordinate in tile units
-    int speed;         // Movement speed (pixels per step)
-    SDL_Texture* playerTexture; // Texture for the player's image
+    int x;             
+    int y;            
+    int speed;        
+    SDL_Texture* playerTexture; 
     SDL_Rect rect;
-    SDL_Rect srcRect; // Source rectangle for sprite selection from the sheet!
+    SDL_Rect srcRect; 
 
     Uint32 lastShotTime;  // Time of the last shot (in milliseconds)
     const Uint32 fireRate; // Minimum time between shots (in milliseconds)
 
-    //const char* texturePath;
 };

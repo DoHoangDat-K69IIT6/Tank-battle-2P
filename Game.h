@@ -47,27 +47,28 @@ public:
     void clean();
 
     static SDL_Renderer* renderer;
-
-    static int getMapWidth() { return mapWidth; }  // Static getter for mapWidth
-    static int getMapHeight() { return mapHeight; } // Static getter for mapHeight
-    static vector<vector<int>>& getMap() { return map; } // Static getter for map
-
-    static GameState getGameState() { return gameState; } // Static getter for gameState
-    static void setGameState(GameState state) { gameState = state; } // Static setter for gameState
-    static int getWinner() { return winner; } // Static getter for winner
-    static void setWinner(int playerNum) { winner = playerNum; } // Static setter for winner
-
     TTF_Font* titlefont;
 
-    static void destroy3x3Walls(int tileCol, int tileRow); // Thêm hàm phá t??ng 3x3
+	// Tra ve cac gia tri cua map
+    static int getMapWidth() { return mapWidth; }  
+    static int getMapHeight() { return mapHeight; } 
+    static vector<vector<int>>& getMap() { return map; } 
+
+	// Tra ve trang thai cua game
+    static GameState getGameState() { return gameState; } 
+    static void setGameState(GameState state) { gameState = state; } 
+    static int getWinner() { return winner; } 
+    static void setWinner(int playerNum) { winner = playerNum; } 
+
+    static void destroy3x3Walls(int tileCol, int tileRow); // Ham pha tuong
 
 private:
     SDL_Window* window;
     bool isRunning;
     int countthu = 0;
-    //GameState gameState;
 
-    // Menu-related
+
+    // Menu
     TTF_Font* font;
     
     SDL_Color textColor;
@@ -86,45 +87,39 @@ private:
     Player* player2;
 
     // texture cua map
-    SDL_Texture* wallTexture;   // Texture for indestructible walls
-    SDL_Texture* wall2Texture; // Texture for walls that can be destroyed (2 hits)
+    SDL_Texture* wallTexture;  
+    SDL_Texture* wall2Texture; 
     SDL_Texture* wall2Texture_damaged1;
     SDL_Texture* wall2Texture_damaged2;
+
+    static vector<vector<int>> map;
+    static int mapWidth;
+    static int mapHeight;
 
     SDL_Texture* bombTexture;
 
     SDL_Texture* targetP1Texture; // Texture for target 1
     SDL_Texture* targetP2Texture; // Texture for target 2
-    SDL_Texture* buff5x5Texture; // Texture for 5x5 stars
     SDL_Texture* buff3x3Texture; // Texture for 3x3 stars
 
     //bullet
     vector<Bullet*> bullets;
 
-    static GameState gameState; // <--- Make gameState static
-    static int winner;          // <--- Add static winner variable
-
-    static vector<vector<int>> map; // <--- Add static here
-    static int mapWidth;                     // <--- Add static here
-    static int mapHeight;                    // <--- Add static here
-
-    int targetP1TileCol, targetP1TileRow; // Tile coordinates for Target P1
-    int targetP2TileCol, targetP2TileRow; // Tile coordinates for Target P2
+    static GameState gameState; 
+    static int winner;          
+            
+	int targetP1TileCol, targetP1TileRow; // Toa do cua target P1 trong tile
+	int targetP2TileCol, targetP2TileRow; // Toa do cua target P2 trong tile
 
     bool loadMap(const char* filePath);
     void renderMap();
-
     void renderMenu();
     void handleMenuEvents(const SDL_Event& event);
-
     void handlePlayingEvents(const SDL_Event& event);
-
-    void copyFileContent(const std::string& sourceFilePath, const std::string& destinationFilePath);
-
-	void resetGame(); // Reset game state and player positions
-
+    void copyFileContent(const string& sourceFilePath, const string& destinationFilePath);
+	void resetGame(); 
 	void renderGameOver();
-    void renderCredits();   // Placeholder
+    void renderCredits();  
 
     Mix_Music* music;       // For background music (if you add music later)
     Mix_Chunk* fireSound;   // For player shooting sound
@@ -138,7 +133,6 @@ private:
     Uint32 buffDuration;      // Duration for which the buff stays on the map (e.g., 5 seconds)
     SDL_Point currentBuffLocation;  // Location of the currently spawned buff (tile coordinates)
     bool isBuffActive;              // Flag to track if a buff is currently active on the map
-    int currentBuffType;            // Stores the type of the current buff (7 or 9)
 
 };
 

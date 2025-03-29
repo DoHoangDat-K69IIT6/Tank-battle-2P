@@ -11,11 +11,10 @@ public:
 
     SDL_Rect getRect() const { return rect; }
     bool isActive() const { return active; }
+    void deactivate() { active = false; }
 
-    void deactivate() { active = false; } // Function to deactivate bullet explicitly
-    // bool isActive() const { return active; }
 
-    bool isBuffBullet; // Thêm bi?n ?? ki?m tra xem ?ây có ph?i ??n buff không
+    bool isBuffBullet;
 
 private:
 
@@ -28,8 +27,7 @@ private:
     SDL_Rect srcRect;
     bool active; // Flag to indicate if the bullet is active (on screen)
 
-    // --- NEW CONSTANTS for Bullet Sprite Sheet ---
     static const int SPRITE_WIDTH;   // Width of each bullet sprite
     static const int SPRITE_HEIGHT;  // Height of each bullet sprite
-    static const int SPRITES_PER_ROW; // Number of bullet sprites per row (if applicable)
+    static const int SPRITES_PER_ROW;
 };

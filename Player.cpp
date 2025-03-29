@@ -20,9 +20,9 @@ Player::Player(int x, int y, const char* texturePath) : startX(x), startY(y), sp
     rect.w = TILE_SIZE;
     rect.h = TILE_SIZE;
 
-    // Initialize source rectangle (for the UP sprite initially)
-    srcRect.x = 0; // Assuming UP sprite is at the first position (x=0) in the sheet
-    srcRect.y = 0; // And at the top row (y=0)
+	// Khoi tao srcRect
+	srcRect.x = 0; // Ban dau xe tang huong len tren (x=0) (trong spritesheet)
+    srcRect.y = 0;
     srcRect.w = TILE_SIZE;
     srcRect.h = TILE_SIZE;
 
@@ -33,28 +33,26 @@ Player::~Player() {
 }
 
 void Player::update(int mapWidth, int mapHeight, vector<vector<int>> map) {
-    // You might have player updates here later
 
 }
 
 void Player::render() {
     switch (facingDirection) {
-        case UP:    srcRect.x = 0 * TILE_SIZE; break;     // Assuming UP is at index 0 in row
-        case RIGHT:  srcRect.x = 1 * TILE_SIZE; break;     // Assuming DOWN is at index 1
-        case DOWN:  srcRect.x = 2 * TILE_SIZE; break;     // Assuming LEFT is at index 2
-        case LEFT: srcRect.x = 3 * TILE_SIZE; break;    // Assuming RIGHT is at index 3
+	    case UP:    srcRect.x = 0 * TILE_SIZE; break;     // Theo sprite sheet, UP la frame dau tien
+		case RIGHT:  srcRect.x = 1 * TILE_SIZE; break;    // RIGHT la frame thu 2
+		case DOWN:  srcRect.x = 2 * TILE_SIZE; break;     // DOWN la frame thu 3
+		case LEFT: srcRect.x = 3 * TILE_SIZE; break;    // LEFT la frame cuoi cung
     }
 
     SDL_RenderCopy(Game::renderer, playerTexture, &srcRect, &rect);
 }
 
 void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vector<vector<int>> map, const Player* otherPlayer) {
-    // cout << "Player::move - Before: x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl;
-
+	// Cap nhat vi tri moi cua nguoi choi
     int newX = x + dx * SPEED;
     int newY = y + dy * SPEED;
 
-    // --- Collision Detection (AABB) ---
+    
     SDL_Rect newRect;
     newRect.x = newX;
     newRect.y = newY;
@@ -70,12 +68,14 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
 
     bool collision = false;
 
-    // Iterate through TILES based on PLAYER's POTENTIAL NEW PIXEL POSITION
+	// Duyet cac vi tri co the di duoc cua nguoi choi
     int startTileRow = max(0, newY / TILE_SIZE - 1);  // Calculate starting tile row in pixel space
-    int endTileRow = std::min(mapHeight / TILE_SIZE - 1, newY / TILE_SIZE + 1); // Calculate ending tile row in pixel space
+    int endTileRow = min(mapHeight / TILE_SIZE - 1, newY / TILE_SIZE + 1); // Calculate ending tile row in pixel space
     int startTileCol = max(0, newX / TILE_SIZE - 1);  // Calculate starting tile col in pixel space
-    int endTileCol = std::min(mapWidth / TILE_SIZE - 1, newX / TILE_SIZE + 1); // Calculate ending tile col in pixel space
+    int endTileCol = min(mapWidth / TILE_SIZE - 1, newX / TILE_SIZE + 1); // Calculate ending tile col in pixel space
 
+	// Tai sao lai co ham max va min o day?
+    // -> Tranh duoc oob (out of bounds) khi nguoi choi o vi tri bien cua map
 
     for (int row = startTileRow; row <= endTileRow; ++row) { // Iterate through tile rows
         for (int col = startTileCol; col <= endTileCol; ++col) { // Iterate through tile cols
@@ -102,8 +102,8 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
     }
 
     // 2. Check for collision with the other player (if otherPlayer is valid)
-    if (!collision && otherPlayer != nullptr) { // Important: Check if otherPlayer is not null
-        SDL_Rect otherRect = otherPlayer->getRect(); // Get the other player's rect
+    if (!collision && otherPlayer != nullptr) { 
+        SDL_Rect otherRect = otherPlayer->getRect(); 
         if (newRect.x < otherRect.x + otherRect.w &&
             newRect.x + newRect.w > otherRect.x &&
             newRect.y < otherRect.y + otherRect.h &&
@@ -121,7 +121,7 @@ void Player::move(int dx, int dy, const int mapWidth, const int mapHeight, vecto
         rect.y = y;
     }
 
-    //std::cout << "Player::move - After:  x=" << x << ", y=" << y << ", rect.x=" << rect.x << ", rect.y=" << rect.y << std::endl; // Debug print
+   
 }
 
 void Player::respawn() {
